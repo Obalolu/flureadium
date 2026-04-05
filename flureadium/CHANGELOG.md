@@ -1,3 +1,9 @@
+## 0.8.3
+
+### Bug Fixes
+
+- **Android**: Fix NullPointerException crash when opening PDF files. Inside `PdfNavigator.initNavigator()`, a Kotlin scope resolution bug caused `engineProvider` to resolve to the uninitialized `PdfReaderViewModel` property instead of the outer `PdfNavigator` property.
+
 ## 0.8.2
 
 ### Bug Fixes

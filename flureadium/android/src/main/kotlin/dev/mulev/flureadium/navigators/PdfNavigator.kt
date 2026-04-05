@@ -119,7 +119,7 @@ class PdfNavigator : BaseNavigator, PdfReaderFragment.Listener {
             vm = PdfReaderViewModel().apply {
                 navigatorFactory = PdfNavigatorFactory(
                     publication,
-                    pdfEngineProvider = engineProvider!!
+                    pdfEngineProvider = this@PdfNavigator.engineProvider!!
                 )
                 locator = this@PdfNavigator.initialLocator
                 fit = this@PdfNavigator.flutterPreferences.toReadiumFit()

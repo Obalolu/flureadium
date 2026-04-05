@@ -49,3 +49,4 @@ bd.db
 # since no pattern above ignores them.
 
 .beads-credential-key
+interactions.jsonl

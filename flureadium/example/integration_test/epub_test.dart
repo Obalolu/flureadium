@@ -24,6 +24,22 @@ void main() {
       expect(find.byType(ReadiumReaderWidget), findsOneWidget);
     });
 
+    testWidgets('long press on reader does not crash', (tester) async {
+      app.main();
+      for (var i = 0; i < 15; i++) {
+        await tester.pump(const Duration(seconds: 1));
+        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
+      }
+
+      final reader = find.byType(ReadiumReaderWidget);
+      expect(reader, findsOneWidget);
+
+      await tester.longPressAt(tester.getCenter(reader));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(reader, findsOneWidget);
+    });
+
     testWidgets('navigate left and right', (tester) async {
       app.main();
       for (var i = 0; i < 15; i++) {

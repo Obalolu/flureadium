@@ -47,6 +47,10 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
 
   var publicationIdentifier: String?
 
+  /// The editing actions shown in the EPUB long-press selection menu.
+  /// Keeping this as a static constant makes the native action set testable.
+  static let epubEditingActions: [EditingAction] = [.copy, .lookup, .translate]
+
   func view() -> UIView {
     print(TAG, "::getView")
     return _view
@@ -104,7 +108,7 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
     config.preloadNextPositionCount = 4
     config.debugState = true
     config.decorationTemplates = HTMLDecorationTemplate.defaultTemplates(alpha: 1.0, experimentalPositioning: true)
-    config.editingActions = [.lookup, .translate, EditingAction(title: "Custom Action", action: #selector(onCustomEditingAction))]
+    config.editingActions = ReadiumReaderView.epubEditingActions
 
     if (defaultPreferences != nil) {
       config.preferences = defaultPreferences!

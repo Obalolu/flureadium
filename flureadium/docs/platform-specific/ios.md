@@ -172,6 +172,26 @@ This is a native iOS layer change only. No Dart or Flutter changes are required.
 - `ReadiumReaderView.swift` - EPUB reader using EdgeTapInterceptView
 - `PdfReaderView.swift` - PDF reader using EdgeTapInterceptView
 
+### Text Selection Copy
+
+When a user long-presses text in an EPUB or PDF reader, iOS shows a native
+selection menu.
+
+**EPUB:** The menu shows Copy, Look Up, and Translate. This is configured via
+Readium's `EditingAction` support with
+`config.editingActions = [.copy, .lookup, .translate]` in
+`EPUBNavigatorViewController.Configuration`. The `.copy` action uses the native
+`copy:` responder selector and copies the current selection to
+`UIPasteboard.general`.
+
+**PDF:** Copy is available through Readium's default editing actions
+(`EditingAction.defaultActions = [.copy, .share, .lookup, .translate]`). The
+`PDFNavigatorViewController` path keeps those defaults.
+
+> Note: Copy still respects DRM rights. For protected publications, Readium
+> checks `UserRights.copy(text:)` before writing to the pasteboard and silently
+> blocks copy when the license denies it.
+
 ### Stream and View Lifecycle
 
 Flureadium iOS uses `EventStreamHandler` to manage Flutter EventChannel streams (text locator, reader status, errors). The `"dispose"` method call from Dart is the single comprehensive cleanup point. `deinit` is a minimal safety net.

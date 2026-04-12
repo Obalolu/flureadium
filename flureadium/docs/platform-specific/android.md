@@ -231,6 +231,16 @@ PDF is always paginated; scroll mode does not apply.
 that lands in an edge zone (claiming the gesture sequence), and `false` for centre touches
 (passing them straight to the Readium WebView / PDF view).
 
+### Text Selection Copy
+
+**EPUB:** Copy is available through Android's native WebView text-selection
+action mode. When the user long-presses EPUB content, the system selection UI
+handles Copy without any plugin-specific override.
+
+**PDF:** Text selection and copy are not supported on this path. The Pdfium
+adapter renders PDF pages as bitmap content, so there is no text layer for the
+system action mode to act on.
+
 ## Troubleshooting
 
 ### "MainActivity cannot be cast to FragmentActivity"

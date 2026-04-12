@@ -1,3 +1,18 @@
+## 0.9.0
+
+### New Features
+
+- **iOS / EPUB**: Add `Copy` to the long-press text selection menu. EPUB selection actions now use `EditingAction.copy`, `EditingAction.lookup`, and `EditingAction.translate`, replacing the old placeholder custom action.
+
+### Testing
+
+- Add iOS XCTest coverage for EPUB editing actions in `EpubEditingActionsTests`.
+- Add an EPUB integration smoke test that long-presses the reader surface and verifies the reader remains mounted.
+
+### Documentation
+
+- Document text-selection copy behavior on iOS and Android, including the existing PDF behavior and the Android PDF limitation.
+
 ## 0.8.3
 
 ### Bug Fixes

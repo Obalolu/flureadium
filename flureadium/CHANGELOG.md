@@ -1,3 +1,19 @@
+## 0.9.1
+
+### Bug Fixes
+
+- **Android / TTS and audiobook background playback**: Start `PluginMediaService` with `startForegroundService()` instead of `startService()` so Android 15 does not kill playback shortly after the app goes to the background.
+- **Android / media session cleanup**: Close the media session if `TTSNavigator.play()` or `AudiobookNavigator.play()` fails while opening the session, preventing a dangling foreground-service start from timing out.
+
+### Testing
+
+- Add Android JVM regression tests for foreground-service startup and `openSession()` failure cleanup in TTS and audiobook navigators.
+
+### Documentation
+
+- Document the Android foreground-service permissions required for background TTS and audiobook playback.
+- Add a troubleshooting note for TTS stopping about a second after the app is backgrounded on Android 15+.
+
 ## 0.9.0
 
 ### New Features

@@ -267,7 +267,7 @@ android {
 1. Check TTS engine is installed (Settings > Accessibility > TTS)
 2. Download language data if prompted
 3. Test with system TTS settings
-4. If TTS stops about a second after the app goes to the background on Android 15+, update to the latest Flureadium release. That bug came from starting the media service with `startService` instead of `startForegroundService`, and it has been fixed.
+4. If TTS stops when the app goes to the background, update to the latest Flureadium release. Recent Android fixes cover both the media-service startup path (`startForegroundService()` instead of `startService()`) and an activity saved-state crash caused by serializing Readium decoration styles when the app was backgrounded.
 
 ### Edge taps not responding
 

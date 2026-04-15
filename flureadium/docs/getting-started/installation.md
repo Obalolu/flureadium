@@ -13,7 +13,7 @@ Add Flureadium to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flureadium: ^0.1.0
+  flureadium: ^0.9.1
 ```
 
 Run:
@@ -66,13 +66,15 @@ class MainActivity: FlutterFragmentActivity() {
 
 This fixes the error: `MainActivity cannot be cast to androidx.fragment.app.FragmentActivity`
 
-#### 4. Add Wake Lock Permission (Optional)
+#### 4. Add Playback Permissions (Optional)
 
 If using TTS or audiobook features, add to `android/app/src/main/AndroidManifest.xml`:
 
 ```xml
 <manifest>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <!-- ... -->
 </manifest>
 ```

@@ -59,6 +59,9 @@ For TTS and audiobook features, add to `AndroidManifest.xml`:
 ```xml
 <manifest>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Required for TTS and audiobook background playback on Android 14+ -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <!-- For network-based publications -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -264,6 +267,7 @@ android {
 1. Check TTS engine is installed (Settings > Accessibility > TTS)
 2. Download language data if prompted
 3. Test with system TTS settings
+4. If TTS stops when the app goes to the background, update to the latest Flureadium release. Recent Android fixes cover both the media-service startup path (`startForegroundService()` instead of `startService()`) and an activity saved-state crash caused by serializing Readium decoration styles when the app was backgrounded.
 
 ### Edge taps not responding
 

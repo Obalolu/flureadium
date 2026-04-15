@@ -23,6 +23,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import androidx.media3.common.ForwardingSimpleBasePlayer
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
@@ -307,7 +308,7 @@ class PluginMediaService : MediaSessionService(), MediaSession.Callback {
 
         fun start(application: Application) {
             val intent = intent(application)
-            application.startService(intent)
+            ContextCompat.startForegroundService(application, intent)
         }
 
         fun stop(application: Application) {

@@ -1,3 +1,21 @@
+## 0.9.1
+
+### Bug Fixes
+
+- **Android / TTS and audiobook background playback**: Start `PluginMediaService` with `startForegroundService()` instead of `startService()` so Android 15 does not kill playback shortly after the app goes to the background.
+- **Android / media session cleanup**: Close the media session if `TTSNavigator.play()` or `AudiobookNavigator.play()` fails while opening the session, preventing a dangling foreground-service start from timing out.
+- **Android / saved-state background crash**: Persist `FlutterDecorationPreferences` as primitive `Bundle` data instead of Java serialization so pressing Home does not crash activity state saving with `BadParcelableException` on devices where Readium decoration styles are not serializable.
+
+### Testing
+
+- Add Android JVM regression tests for foreground-service startup and `openSession()` failure cleanup in TTS and audiobook navigators.
+- Add Android JVM regression tests for `FlutterDecorationPreferences` bundle round-tripping and `ReadiumReader.storeState()` parcel-safe saved-state persistence.
+
+### Documentation
+
+- Document the Android foreground-service permissions required for background TTS and audiobook playback.
+- Update the Android troubleshooting note to cover both the foreground-service startup fix and the saved-state crash fix for playback stopping when the app is backgrounded.
+
 ## 0.9.0
 
 ### New Features

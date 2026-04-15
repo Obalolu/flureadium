@@ -280,7 +280,7 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
             putBundle(audioNavigatorStateKey, audiobookNavigator?.storeState())
             putBoolean(syncAudioEnabledKey, syncAudiobookNavigator != null)
             putBundle(syncAudioNavigatorStateKey, syncAudiobookNavigator?.storeState())
-            putSerializable(decorationStyleKey, decorationStyle)
+            putBundle(decorationStyleKey, decorationStyle.toBundle())
         }
     }
 
@@ -305,7 +305,7 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
                 return@launch
             }
 
-            decorationStyle = bundle.getSerializable(decorationStyleKey) as? FlutterDecorationPreferences ?: FlutterDecorationPreferences()
+            decorationStyle = FlutterDecorationPreferences.fromBundle(bundle.getBundle(decorationStyleKey))
 
             if (bundle.getBoolean(epubEnabledKey)) {
                 Log.d(TAG, ":storeState - restore epub navigator")

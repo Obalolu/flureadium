@@ -166,6 +166,7 @@ class TTSNavigator(
                 ttsNavigator?.play()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to open MediaSession: $e")
+                mediaServiceFacade?.closeSession()
                 ttsNavigator?.close()
                 return@async
             }

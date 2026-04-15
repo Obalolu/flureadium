@@ -123,6 +123,7 @@ open class AudiobookNavigator(
                 mediaServiceFacade?.openSession(audioNavigator!!)
             } catch (e: Exception) {
                 Log.e(TAG, "Error opening MediaSession: ${e.message}")
+                mediaServiceFacade?.closeSession()
                 audioNavigator?.close()
                 return@async
             }
@@ -305,4 +306,3 @@ open class AudiobookNavigator(
         }
     }
 }
-

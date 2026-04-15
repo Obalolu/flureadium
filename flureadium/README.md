@@ -21,7 +21,7 @@ A comprehensive Flutter plugin for reading EPUB ebooks, audiobooks, and comics u
 
 ```yaml
 dependencies:
-  flureadium: ^0.8.0
+  flureadium: ^0.9.1
 ```
 
 ### Platform Setup
@@ -46,6 +46,8 @@ class MainActivity: FlutterFragmentActivity()
 3. If using TTS with `AudioService`, add to `AndroidManifest.xml`:
 ```xml
 <uses-permission android:name="android.permission.WAKE_LOCK" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 ```
 
 </details>

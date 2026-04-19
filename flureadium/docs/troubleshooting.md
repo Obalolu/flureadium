@@ -94,6 +94,20 @@ cd ios
 pod install --repo-update
 ```
 
+### iOS: Reader crash while turning pages or closing the reader
+
+**Symptoms:**
+- Crash in `ReadiumReaderView.getLocatorFragments`
+- More likely while a page-change callback is in flight and the reader is closed immediately after
+
+**Cause:**
+Older versions force-unwrapped the JavaScript locator-fragments result. Readium returns `()` when the JavaScript side yields `null`, and a detached page-change task could also race with `dispose`.
+
+**Solution:**
+Upgrade to a version containing the fix, or backport both changes:
+1. Replace the force-unwrap in `getLocatorFragments` with safe dictionary parsing and `try? Locator(...)`.
+2. Guard asynchronous page-change work with a disposal flag and a weak `self` capture before evaluating JavaScript or sending Flutter events.
+
 ### Web: JavaScript File Not Found
 
 **Error:**

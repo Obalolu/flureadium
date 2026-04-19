@@ -18,6 +18,19 @@ import 'src/utils/toc_matcher.dart';
 
 const _viewType = 'dev.mulev.flureadium/ReadiumReaderWidget';
 
+@visibleForTesting
+ReadiumReaderChannel createReadiumReaderChannel(
+  int id, {
+  required ValueChanged<Locator> onPageChanged,
+  ValueChanged<String>? onExternalLinkActivated,
+}) {
+  return ReadiumReaderChannel(
+    '$_viewType:$id',
+    onPageChanged: onPageChanged,
+    onExternalLinkActivated: onExternalLinkActivated,
+  );
+}
+
 /// A ReadiumReaderWidget wraps a native Kotlin/Swift Readium navigator widget.
 class ReadiumReaderWidget extends StatefulWidget {
   const ReadiumReaderWidget({
@@ -407,8 +420,8 @@ class _ReadiumReaderWidgetState extends State<ReadiumReaderWidget>
   int? _lastNavigatedTocIndex;
 
   void _onPlatformViewCreated(final int id) {
-    _channel = ReadiumReaderChannel(
-      '$_viewType:$id',
+    _channel = createReadiumReaderChannel(
+      id,
       onPageChanged: (final locator) {
         debugPrint('onPageChanged: ${locator.toJson()}');
         _currentLocator = locator;
@@ -425,6 +438,7 @@ class _ReadiumReaderWidgetState extends State<ReadiumReaderWidget>
           }
         }
       },
+      onExternalLinkActivated: widget.onExternalLinkActivated,
     );
 
     // Register as current widget only after _channel is assigned.

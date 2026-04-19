@@ -1,6 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flureadium/flureadium.dart';
 
+import 'reader_channel.dart';
+
+const _viewType = 'dev.mulev.flureadium/ReadiumReaderWidget';
+
+@visibleForTesting
+ReadiumReaderChannel createReadiumReaderChannel(
+  int id, {
+  required ValueChanged<Locator> onPageChanged,
+  ValueChanged<String>? onExternalLinkActivated,
+}) {
+  return ReadiumReaderChannel(
+    '$_viewType:$id',
+    onPageChanged: onPageChanged,
+    onExternalLinkActivated: onExternalLinkActivated,
+  );
+}
+
 class ReadiumReaderWidget extends StatelessWidget {
   const ReadiumReaderWidget({
     required this.publication,

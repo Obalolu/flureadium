@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flureadium/flureadium.dart';
+
+import 'reader_channel.dart';
 import 'src/index.dart';
+
+const _viewType = 'dev.mulev.flureadium/ReadiumReaderWidget';
+
+@visibleForTesting
+ReadiumReaderChannel createReadiumReaderChannel(
+  int id, {
+  required ValueChanged<Locator> onPageChanged,
+  ValueChanged<String>? onExternalLinkActivated,
+}) {
+  return ReadiumReaderChannel(
+    '$_viewType:$id',
+    onPageChanged: onPageChanged,
+    onExternalLinkActivated: onExternalLinkActivated,
+  );
+}
 
 class ReadiumReaderWidget extends StatefulWidget {
   const ReadiumReaderWidget({
@@ -12,6 +29,8 @@ class ReadiumReaderWidget extends StatefulWidget {
     this.onGoLeft,
     this.onGoRight,
     this.onSwipe,
+    this.onExternalLinkActivated,
+    this.onLocatorChanged,
     this.onReady,
     super.key,
   });
@@ -23,6 +42,8 @@ class ReadiumReaderWidget extends StatefulWidget {
   final VoidCallback? onGoLeft;
   final VoidCallback? onGoRight;
   final VoidCallback? onSwipe;
+  final Function(String)? onExternalLinkActivated;
+  final void Function(Locator)? onLocatorChanged;
 
   /// Called once when the widget is ready to accept stream subscriptions.
   /// On web, event channels are registered eagerly, so this fires from initState.

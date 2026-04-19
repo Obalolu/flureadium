@@ -1,3 +1,19 @@
+## 0.9.4
+
+### Bug Fixes
+
+- **Reader external-link callbacks**: Forward `ReadiumReaderWidget.onExternalLinkActivated` into `ReadiumReaderChannel` so Dart hosts actually receive external-link activations reported by the native reader.
+- **Analyzer/test export mismatch**: Expose the widget-test channel-construction helper consistently across the conditional `reader_widget_*` exports so `dart analyze` and `flutter test` resolve the same public surface.
+
+### Testing
+
+- Add Dart regressions for the native `onExternalLinkActivated` method-call path and the widget/channel construction seam.
+- Verify `dart analyze`, `flureadium/flutter test`, `flureadium_platform_interface/flutter test`, and the example EPUB integration smoke test pass.
+
+### Documentation
+
+- Document `onExternalLinkActivated` as a delivered integration callback and clarify that host apps can hand external links off to the OS browser for restricted-content flows.
+
 ## 0.9.3
 
 ### Bug Fixes

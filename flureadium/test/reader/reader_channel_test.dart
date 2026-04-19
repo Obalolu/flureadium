@@ -119,4 +119,21 @@ void main() {
       expect(decoMap['style'], isA<Map>());
     });
   });
+
+  group('native callbacks', () {
+    test('forwards external link callback from native method call', () async {
+      String? seen;
+      channel = ReadiumReaderChannel(
+        channelName,
+        onPageChanged: (_) {},
+        onExternalLinkActivated: (url) => seen = url,
+      );
+
+      await channel.onMethodCall(
+        const MethodCall('onExternalLinkActivated', 'https://example.com'),
+      );
+
+      expect(seen, 'https://example.com');
+    });
+  });
 }

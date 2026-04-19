@@ -142,19 +142,29 @@ Called on swipe gestures.
 
 **Type:** `Function(String)?`
 
-Called when the user taps an external link (URLs outside the publication).
+Called when the native reader reports that the user activated an external link
+(a URL outside the publication). The callback is delivered to the host app, so
+the host decides whether to block, confirm, or launch the URL.
 
 ```dart
 ReadiumReaderWidget(
   publication: pub,
   onExternalLinkActivated: (url) async {
-    // Open in browser
+    // Host app controls external-link policy.
     if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
+      await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      );
     }
   },
 )
 ```
+
+Use this seam to keep reader-originated links consistent with the rest of your
+app's external URL policy. For example, apps that must avoid in-app browser
+surfaces during restricted-content flows can always hand the URL off to the OS
+browser instead.
 
 ### onLocatorChanged
 

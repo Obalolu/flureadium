@@ -506,11 +506,23 @@ ReadiumReaderWidget(
     );
 
     if (confirmed == true) {
-      await launchUrl(Uri.parse(url));
+      await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      );
     }
   },
 )
 ```
+
+`onExternalLinkActivated` is the handoff point from the native reader back into
+your Flutter app. Treat it as policy, not just telemetry: your app decides
+whether to block the URL, show a confirmation step, or hand it to the OS.
+
+For restricted-content or parental-controls scenarios, prefer
+`LaunchMode.externalApplication` so the OS browser owns the transition instead
+of an in-app browser surface. That keeps reader-originated links aligned with
+the same external launch policy you use elsewhere in the app.
 
 ## Complete Example
 

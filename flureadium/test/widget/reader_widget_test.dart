@@ -217,6 +217,18 @@ void main() {
         widget.onGoRight!();
         expect(wentRight, isTrue);
       });
+
+      test('createReadiumReaderChannel carries onExternalLinkActivated', () {
+        void onExternalLink(String _) {}
+
+        final channel = createReadiumReaderChannel(
+          42,
+          onPageChanged: (_) {},
+          onExternalLinkActivated: onExternalLink,
+        );
+
+        expect(channel.onExternalLinkActivated, same(onExternalLink));
+      });
     });
 
     group('publication data', () {

@@ -380,7 +380,9 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
     print(TAG, "emitOnPageChanged:locator=\(String(describing: locator))")
 
     Task.detached(priority: .high) { [isVerticalScroll, weak self] in
-      guard let self, !self.isDisposed else { return }
+      guard let self else { return }
+      let isDisposed = await MainActor.run { self.isDisposed }
+      guard !isDisposed else { return }
       guard let locatorWithFragments = await self.getLocatorFragments(json, isVerticalScroll) else {
         print(TAG, "emitOnPageChanged failed!")
         return

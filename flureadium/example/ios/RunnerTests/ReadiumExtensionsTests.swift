@@ -54,6 +54,37 @@ final class LocatorExtensionTests: XCTestCase {
     }
 }
 
+final class LocatorParsingTests: XCTestCase {
+
+    func testParseLocatorFragmentsResultReturnsLocatorForValidJson() {
+        let result: [String: Any?] = [
+            "href": "https://example.com/ch1.xhtml",
+            "type": MediaType.html.string,
+            "locations": [
+                "fragments": ["#page-1"],
+            ],
+        ]
+
+        let locator = parseLocatorFragmentsResult(result)
+
+        XCTAssertEqual(locator?.href.string, "https://example.com/ch1.xhtml")
+        XCTAssertEqual(locator?.mediaType, .html)
+        XCTAssertEqual(locator?.locations.fragments, ["#page-1"])
+    }
+
+    func testParseLocatorFragmentsResultReturnsNilForNullJavascriptValue() {
+        XCTAssertNil(parseLocatorFragmentsResult(()))
+    }
+
+    func testParseLocatorFragmentsResultReturnsNilForMalformedJson() {
+        let result: [String: Any?] = [
+            "href": "https://example.com/ch1.xhtml",
+        ]
+
+        XCTAssertNil(parseLocatorFragmentsResult(result))
+    }
+}
+
 // MARK: - State Mapping Tests
 
 final class StateMappingTests: XCTestCase {

@@ -1,3 +1,19 @@
+## 0.9.3
+
+### Bug Fixes
+
+- **iOS / EPUB reader locator crash**: Replace the force-unwrapped `getLocatorFragments()` parse path with safe optional handling so `null` JavaScript results no longer crash the reader.
+- **iOS / reader disposal race**: Guard async page-change callbacks with a disposal flag and `MainActor` state reads so page-change work does not outlive a torn-down reader view.
+
+### Testing
+
+- Add iOS regression coverage for locator-fragment result parsing in `ReadiumExtensionsTests`.
+- Verify Flutter tests, native iOS `RunnerTests`, and example integration tests pass for the fix.
+
+### Documentation
+
+- Add a troubleshooting entry covering the locator-fragment crash symptoms, cause, and remediation.
+
 ## 0.9.2
 
 ### Bug Fixes

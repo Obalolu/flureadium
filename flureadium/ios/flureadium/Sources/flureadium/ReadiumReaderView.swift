@@ -22,6 +22,14 @@ class ReadiumBugLogger: ReadiumShared.WarningLogger {
 private let readiumBugLogger = ReadiumBugLogger()
 private var userScripts: [WKUserScript] = []
 
+func parseLocatorFragmentsResult(_ result: Any?) -> Locator? {
+  guard let json = result as? Dictionary<String, Any?> else {
+    return nil
+  }
+
+  return try? Locator(json: json, warnings: readiumBugLogger)
+}
+
 class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, VisualNavigatorDelegate {
 
   private let channel: ReadiumReaderChannel
@@ -32,6 +40,7 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
   private let readiumViewController: EPUBNavigatorViewController
   private var isVerticalScroll = false
   private var hasSentReady = false
+  private var isDisposed = false
   private var enableEdgeTapNavigation: Bool
   private var enableSwipeNavigation: Bool
   private var edgeTapAreaPoints: CGFloat?
@@ -370,12 +379,16 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
 
     print(TAG, "emitOnPageChanged:locator=\(String(describing: locator))")
 
-    Task.detached(priority: .high) { [isVerticalScroll] in
+    Task.detached(priority: .high) { [isVerticalScroll, weak self] in
+      guard let self else { return }
+      let isDisposed = await MainActor.run { self.isDisposed }
+      guard !isDisposed else { return }
       guard let locatorWithFragments = await self.getLocatorFragments(json, isVerticalScroll) else {
         print(TAG, "emitOnPageChanged failed!")
         return
       }
-      await MainActor.run() {
+      await MainActor.run {
+        guard !self.isDisposed else { return }
         self.channel.onPageChanged(locator: locatorWithFragments)
         guard let textLocatorStreamHandler = self.textLocatorStreamHandler else {
           print(TAG, "emitOnPageChanged: textLocatorStreamHandler is nil!")
@@ -397,9 +410,16 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
   }
 
   internal func getLocatorFragments(_ locatorJson: String, _ isVerticalScroll: Bool) async -> Locator? {
+    guard !isDisposed else {
+      return nil
+    }
+
     switch await self.evaluateJavascript("window.epubPage.getLocatorFragments(\(locatorJson), \(isVerticalScroll));") {
       case .success(let jresult):
-        let locatorWithFragments = try! Locator(json: jresult as? Dictionary<String, Any?>, warnings: readiumBugLogger)!
+        guard let locatorWithFragments = parseLocatorFragmentsResult(jresult) else {
+          print(TAG, "getLocatorFragments: failed to parse locator from JS result")
+          return nil
+        }
         return locatorWithFragments
       case .failure(let err):
         print(TAG, "getLocatorFragments failed! \(err)")
@@ -591,6 +611,7 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
       break
     case "dispose":
       print(TAG, "Disposing readiumViewController")
+      isDisposed = true
       readiumViewController.view.removeFromSuperview()
       readiumViewController.delegate = nil
       self.readerStatusStreamHandler?.sendEvent(ReadiumReaderStatusClosed)

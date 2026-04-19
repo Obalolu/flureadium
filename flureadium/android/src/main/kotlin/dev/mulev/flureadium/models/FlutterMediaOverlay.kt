@@ -8,14 +8,12 @@ import org.json.JSONObject
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.util.mediatype.MediaType
-import java.io.Serializable
-
 private const val TAG = "FlutterMediaOverlay"
 
 /**
  * Simple media overlay mapping.
  */
-data class FlutterMediaOverlay(val items: List<FlutterMediaOverlayItem>) : Serializable {
+data class FlutterMediaOverlay(val items: List<FlutterMediaOverlayItem>) {
     /**
      * The audio file name (without fragment).
      */

@@ -19,8 +19,6 @@ import org.readium.r2.shared.publication.Publication
 
 private const val TAG = "SyncAudiobookNavigator"
 
-private const val mediaOverlaysKey = "MediaOverlays"
-
 private const val SYNC_AUDIO_DECORATION_ID_UTTERANCE = "synced-utterance"
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalReadiumApi::class)
@@ -106,12 +104,6 @@ class SyncAudiobookNavigator(
         }
 
         super.onCurrentLocatorChanges(audioLocator)
-    }
-
-    override fun storeState(): Bundle {
-        return super.storeState().apply {
-            putSerializable(mediaOverlaysKey, ArrayList(mediaOverlays))
-        }
     }
 
     override suspend fun play(fromLocator: Locator?) {

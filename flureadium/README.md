@@ -21,7 +21,7 @@ A comprehensive Flutter plugin for reading EPUB ebooks, audiobooks, and comics u
 
 ```yaml
 dependencies:
-  flureadium: ^0.9.1
+  flureadium: ^0.9.2
 ```
 
 ### Platform Setup

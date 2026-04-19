@@ -4,7 +4,6 @@ import org.json.JSONObject
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.util.mediatype.MediaType
-import java.io.Serializable
 
 /**
  * A single media overlay item mapping audio to text.
@@ -29,7 +28,7 @@ data class FlutterMediaOverlayItem(
      * The title of the chapter or section this item belongs to
      */
     val title: String
-) : Serializable {
+) {
     /**
      * The audio file without the fragment (e.g. "chapter1.mp3")
      */

@@ -1,3 +1,9 @@
+## 0.9.2
+
+### Bug Fixes
+
+- **Android / sync audiobook saved-state crash**: `SyncAudiobookNavigator.storeState()` put `FlutterMediaOverlay` objects into the Bundle via `putSerializable`, but those objects contain non-serializable Readium types (`Url`, `MediaType`). Android's activity state save hit `BadParcelableException` → `NotSerializableException` during synchronized audiobook playback. The data was never actually read back — `restoreState()` re-derives overlays from the publication — so the fix drops the dead `putSerializable` call and removes `Serializable` from both model classes.
+
 ## 0.9.1
 
 ### Bug Fixes

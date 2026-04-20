@@ -17,6 +17,7 @@ import dev.mulev.flureadium.events.TimedBasedStateEventChannel
 import dev.mulev.flureadium.models.ReadiumTimebasedState
 import dev.mulev.flureadium.navigators.AudiobookNavigator
 import dev.mulev.flureadium.navigators.EpubNavigator
+import dev.mulev.flureadium.navigators.ImageNavigator
 import dev.mulev.flureadium.navigators.PdfNavigator
 import dev.mulev.flureadium.navigators.SyncAudiobookNavigator
 import dev.mulev.flureadium.navigators.TTSNavigator
@@ -82,6 +83,8 @@ private const val ttsNavigatorStateKey = "ttsState"
 private const val audioNavigatorStateKey = "audioState"
 private const val syncAudioNavigatorStateKey = "syncAudioState"
 private const val epubNavigatorStateKey = "epubState"
+private const val imageEnabledKey = "imageEnabled"
+private const val imageNavigatorStateKey = "imageState"
 private const val pdfEnabledKey = "pdfEnabled"
 private const val pdfNavigatorStateKey = "pdfState"
 private const val decorationStyleKey = "decorationStyle"
@@ -90,7 +93,7 @@ private const val decorationStyleKey = "decorationStyle"
 
 @ExperimentalCoroutinesApi
 @OptIn(ExperimentalReadiumApi::class)
-object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.VisualListener, PdfNavigator.VisualListener {
+object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.VisualListener, ImageNavigator.VisualListener, PdfNavigator.VisualListener {
     private val mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val jobs = mutableListOf<Job>()
@@ -184,6 +187,11 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
     val epubCurrentLocator: Locator?
         get() = epubNavigator?.currentLocator?.value
 
+    private var imageNavigator: ImageNavigator? = null
+
+    val imageCurrentLocator: Locator?
+        get() = imageNavigator?.currentLocator?.value
+
     private var pdfNavigator: PdfNavigator? = null
 
     val pdfCurrentLocator: Locator?
@@ -272,6 +280,8 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
             putString(currentPublicationUrlKey, currentPublicationUrl)
             putBoolean(epubEnabledKey, epubNavigator != null)
             putBundle(epubNavigatorStateKey, epubNavigator?.storeState())
+            putBoolean(imageEnabledKey, imageNavigator != null)
+            putBundle(imageNavigatorStateKey, imageNavigator?.storeState())
             putBoolean(pdfEnabledKey, pdfNavigator != null)
             putBundle(pdfNavigatorStateKey, pdfNavigator?.storeState())
             putBoolean(ttsEnabledKey, ttsNavigator != null)
@@ -314,6 +324,17 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
                         EpubNavigator.restoreState(pub, this@ReadiumReader, state).apply {
                             initNavigator()
                             Log.d(TAG, ":storeState - epubNavigator restored")
+                        }
+                }
+            }
+
+            if (bundle.getBoolean(imageEnabledKey)) {
+                Log.d(TAG, ":storeState - restore image navigator")
+                bundle.getBundle(imageNavigatorStateKey)?.let { state ->
+                    imageNavigator =
+                        ImageNavigator.restoreState(pub, this@ReadiumReader, state).apply {
+                            initNavigator()
+                            Log.d(TAG, ":storeState - imageNavigator restored")
                         }
                 }
             }
@@ -567,6 +588,8 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
         syncAudiobookNavigator = null
         pdfNavigator?.release()
         pdfNavigator = null
+        imageNavigator?.release()
+        imageNavigator = null
         epubNavigator?.release()
         epubNavigator = null
 
@@ -637,6 +660,10 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
             syncAudiobookNavigator = null
             pdfNavigator?.release()
             pdfNavigator = null
+            imageNavigator?.release()
+            imageNavigator = null
+            epubNavigator?.release()
+            epubNavigator = null
 
             _currentPublication?.close()
             _currentPublication = null
@@ -739,6 +766,75 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
 
         isReadyEventChannel?.dispose()
         isReadyEventChannel = null
+    }
+
+    @OptIn(InternalReadiumApi::class)
+    suspend fun imageEnable(
+        initialLocator: Locator?,
+        messenger: BinaryMessenger,
+        fragmentManager: FragmentManager,
+        viewGroup: ViewGroup,
+        readerWidget: ReadiumReaderWidget
+    ) {
+        val pub = currentPublication ?: throw Exception("Publication not opened cannot enable image navigator")
+
+        isReadyEventChannel?.dispose()
+        isReadyEventChannel = EpubIsReadyEventChannel(messenger)
+        currentReaderWidget = readerWidget
+
+        if (pub.readerKind() != PublicationReaderKind.IMAGE) {
+            throw Exception("Publication is not image-based, cannot enable image navigator")
+        }
+
+        withScope(mainScope) {
+            imageNavigator?.let {
+                attachImageNavigator(fragmentManager, viewGroup)
+                return@withScope
+            }
+
+            ImageNavigator(pub, initialLocator, this@ReadiumReader).apply {
+                initNavigator()
+                imageNavigator = this
+                attachImageNavigator(fragmentManager, viewGroup)
+                return@withScope
+            }
+        }
+    }
+
+    suspend fun attachImageNavigator(fragmentManager: FragmentManager?, viewGroup: ViewGroup?) {
+        if (fragmentManager == null || viewGroup == null) {
+            Log.d(TAG, "attachImageNavigator: Missing fragmentManager or viewGroup")
+            return
+        }
+
+        mainScope.async {
+            imageNavigator?.attachNavigator(fragmentManager, viewGroup)
+        }.await()
+    }
+
+    fun imageClose() {
+        currentReaderWidget = null
+        imageNavigator?.dispose()
+        imageNavigator = null
+
+        isReadyEventChannel?.dispose()
+        isReadyEventChannel = null
+    }
+
+    fun imageSetNavigationConfig(config: FlutterNavigationConfig) {
+        imageNavigator?.setNavigationConfig(config)
+    }
+
+    fun imageGoLeft(animated: Boolean) {
+        imageNavigator?.goLeft(animated)
+    }
+
+    fun imageGoRight(animated: Boolean) {
+        imageNavigator?.goRight(animated)
+    }
+
+    suspend fun imageGoToLocator(locator: Locator, animated: Boolean) {
+        imageNavigator?.goToLocator(locator, animated)
     }
 
     @OptIn(InternalReadiumApi::class)
@@ -952,6 +1048,7 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
         audiobookNavigator?.goToLocator(locator)
         syncAudiobookNavigator?.goToLocator(locator)
         ttsNavigator?.goToLocator(locator)
+        imageGoToLocator(locator, true)
         epubGoToLocator(locator, true)
     }
 

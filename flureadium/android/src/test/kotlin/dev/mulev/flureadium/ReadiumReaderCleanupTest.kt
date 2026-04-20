@@ -1,6 +1,7 @@
 package dev.mulev.flureadium
 
 import dev.mulev.flureadium.navigators.AudiobookNavigator
+import dev.mulev.flureadium.navigators.ImageNavigator
 import dev.mulev.flureadium.navigators.SyncAudiobookNavigator
 import dev.mulev.flureadium.navigators.TTSNavigator
 import dev.mulev.flureadium.navigators.TimebasedNavigator
@@ -52,6 +53,7 @@ internal class ReadiumReaderCleanupTest {
         setReaderField("syncAudiobookNavigator", null)
         setReaderField("ttsNavigator", null)
         setReaderField("pdfNavigator", null)
+        setReaderField("imageNavigator", null)
     }
 
     private fun setReaderField(name: String, value: Any?) {
@@ -118,5 +120,19 @@ internal class ReadiumReaderCleanupTest {
         ReadiumReader.closePublication()
 
         assertNull(getReaderField("syncAudiobookNavigator"))
+    }
+
+    @Test
+    fun closePublication_releasesImageNavigator() = runTest {
+        val navigator = ImageNavigator(
+            mock(Publication::class.java),
+            null,
+            mock(ImageNavigator.VisualListener::class.java)
+        )
+        setReaderField("imageNavigator", navigator)
+
+        ReadiumReader.closePublication()
+
+        assertNull(getReaderField("imageNavigator"))
     }
 }

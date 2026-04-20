@@ -16,14 +16,23 @@ class ReadiumReaderViewFactory: NSObject, @preconcurrency FlutterPlatformViewFac
         viewIdentifier viewId: Int64,
         arguments args: Any?
     ) -> FlutterPlatformView {
-        // Check if current publication is PDF
-        if let publication = getCurrentPublication(),
-           publication.conforms(to: .pdf) {
-            return PdfReaderView(
-                frame: frame,
-                viewIdentifier: viewId,
-                arguments: args,
-                registrar: registrar!)
+        if let publication = getCurrentPublication() {
+            switch readerViewKind(for: publication) {
+            case .pdf:
+                return PdfReaderView(
+                    frame: frame,
+                    viewIdentifier: viewId,
+                    arguments: args,
+                    registrar: registrar!)
+            case .image:
+                return ImageReaderView(
+                    frame: frame,
+                    viewIdentifier: viewId,
+                    arguments: args,
+                    registrar: registrar!)
+            case .epub:
+                break
+            }
         }
 
         // Default to EPUB reader

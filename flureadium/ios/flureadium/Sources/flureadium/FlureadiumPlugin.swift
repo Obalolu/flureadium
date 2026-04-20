@@ -12,6 +12,7 @@ internal var currentPublicationUrlStr: String?
 internal var currentPublication: Publication?
 internal weak var currentReaderView: ReadiumReaderView?
 internal weak var currentPdfReaderView: PdfReaderView?
+internal weak var currentImageReaderView: ImageReaderView?
 
 func getCurrentPublication() -> Publication? {
   return currentPublication
@@ -583,6 +584,7 @@ extension FlureadiumPlugin {
       self.timebasedNavigator = nil
       currentReaderView = nil
       currentPdfReaderView = nil
+      currentImageReaderView = nil
       currentPublication?.close()
       currentPublication = nil
       currentPublicationUrlStr = nil

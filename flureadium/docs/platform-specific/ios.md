@@ -120,7 +120,7 @@ Uses GCDWebServer to serve EPUB resources:
 
 ### Edge Tap and Swipe Navigation
 
-The flureadium iOS plugin supports both edge tap and swipe gesture navigation for EPUB and PDF readers.
+The flureadium iOS plugin supports both edge tap and swipe gesture navigation for EPUB, PDF, and image-based readers.
 
 **How It Works:**
 
@@ -164,6 +164,7 @@ To fix this, `EdgeTapInterceptView` has an `interceptEdgeTaps: Bool` property (d
 - **EPUB paginated mode** — `interceptEdgeTaps = true` always. The view absorbs all edge-zone touches regardless of whether callbacks are configured. `DirectionalNavigationAdapter` never sees them.
 - **EPUB scroll mode** — `interceptEdgeTaps = false`. WKWebView receives all touches natively for scrolling.
 - **PDF reader** — `interceptEdgeTaps = enableEdgeTapNavigation`. PDF has no scroll mode on this path, so the view only intercepts when the feature is on.
+- **Image reader** — `interceptEdgeTaps = enableEdgeTapNavigation`. CBZ and DIVINA use the same edge-tap/swipe overlay pattern as the PDF path.
 
 This is a native iOS layer change only. No Dart or Flutter changes are required.
 
@@ -171,6 +172,7 @@ This is a native iOS layer change only. No Dart or Flutter changes are required.
 - `EdgeTapInterceptView.swift` - Shared edge tap and swipe detection view
 - `ReadiumReaderView.swift` - EPUB reader using EdgeTapInterceptView
 - `PdfReaderView.swift` - PDF reader using EdgeTapInterceptView
+- `ImageReaderView.swift` - CBZ / DIVINA reader using EdgeTapInterceptView
 
 ### Text Selection Copy
 

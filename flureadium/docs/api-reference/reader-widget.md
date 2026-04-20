@@ -1,6 +1,6 @@
 # ReaderWidget
 
-The `ReadiumReaderWidget` displays publication content and handles user interactions. It wraps native Readium navigator views for each platform.
+The `ReadiumReaderWidget` displays publication content and handles user interactions. It wraps native Readium navigator views for each platform, including EPUB, PDF, and image-based publications such as CBZ and DIVINA.
 
 **Source:** [reader_widget.dart](../../lib/reader_widget.dart)
 
@@ -43,6 +43,13 @@ The publication to display. Obtain from `flureadium.openPublication()`.
 ```dart
 final pub = await flureadium.openPublication('book.epub');
 ReadiumReaderWidget(publication: pub, ...)
+```
+
+The same widget also renders image-based publications:
+
+```dart
+final comic = await flureadium.openPublication('issue.cbz');
+ReadiumReaderWidget(publication: comic)
 ```
 
 ### loadingWidget

@@ -7,20 +7,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flureadium/flureadium.dart';
 
-void main() {
+const _defaultInitialAsset = String.fromEnvironment(
+  'FLUREADIUM_INITIAL_ASSET',
+  defaultValue: 'assets/pubs/moby_dick.epub',
+);
+
+void main({String initialAsset = _defaultInitialAsset}) {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ExampleApp());
+  runApp(ExampleApp(initialAsset: initialAsset));
 }
 
 class ExampleApp extends StatelessWidget {
-  const ExampleApp({super.key});
+  const ExampleApp({this.initialAsset = _defaultInitialAsset, super.key});
+
+  final String initialAsset;
 
   @override
-  Widget build(BuildContext context) => const MaterialApp(home: ReaderPage());
+  Widget build(BuildContext context) =>
+      MaterialApp(home: ReaderPage(initialAsset: initialAsset));
 }
 
 class ReaderPage extends StatefulWidget {
-  const ReaderPage({super.key});
+  const ReaderPage({this.initialAsset = _defaultInitialAsset, super.key});
+
+  final String initialAsset;
 
   @override
   State<ReaderPage> createState() => _ReaderPageState();
@@ -64,7 +74,9 @@ class _ReaderPageState extends State<ReaderPage> {
         _ttsErrorType = _ttsEnabled ? s.ttsErrorType : null;
       }),
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _openEpub());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _openPublicationAsset(widget.initialAsset),
+    );
   }
 
   // Called by ReadiumReaderWidget.onReady, which fires from _onPlatformViewCreated
@@ -101,21 +113,25 @@ class _ReaderPageState extends State<ReaderPage> {
 
   Future<void> _openEpub() async {
     try {
-      final path = await _extractAsset('assets/pubs/moby_dick.epub');
-      final pub = await _flureadium.openPublication(path);
-      if (!mounted) return;
-      setState(() {
-        _publication = pub;
-        _ttsEnabled = false;
-        _lastTtsLocator = null;
-        _readerLocatorAtTtsDisable = null;
-        _audioEnabled = false;
-        _audioPaused = false;
-        _voices = [];
-        _voiceIndex = 0;
-      });
+      await _openPublicationAsset('assets/pubs/moby_dick.epub');
     } catch (e) {
       debugPrint('openEpub error: $e');
+    }
+  }
+
+  Future<void> _openCbz() async {
+    try {
+      await _openPublicationAsset('assets/pubs/sample_comic.cbz');
+    } catch (e) {
+      debugPrint('openCbz error: $e');
+    }
+  }
+
+  Future<void> _openDivina() async {
+    try {
+      await _openPublicationAsset('assets/pubs/sample_visual.divina');
+    } catch (e) {
+      debugPrint('openDivina error: $e');
     }
   }
 
@@ -137,6 +153,22 @@ class _ReaderPageState extends State<ReaderPage> {
     } catch (e) {
       debugPrint('openAudiobook error: $e');
     }
+  }
+
+  Future<void> _openPublicationAsset(String assetPath) async {
+    final path = await _extractAsset(assetPath);
+    final pub = await _flureadium.openPublication(path);
+    if (!mounted) return;
+    setState(() {
+      _publication = pub;
+      _ttsEnabled = false;
+      _lastTtsLocator = null;
+      _readerLocatorAtTtsDisable = null;
+      _audioEnabled = false;
+      _audioPaused = false;
+      _voices = [];
+      _voiceIndex = 0;
+    });
   }
 
   Future<void> _openWebPub() async {
@@ -402,6 +434,14 @@ class _ReaderPageState extends State<ReaderPage> {
                         TextButton(
                           onPressed: _openAudiobook,
                           child: const Text('Open AudioBook'),
+                        ),
+                        TextButton(
+                          onPressed: _openCbz,
+                          child: const Text('Open CBZ'),
+                        ),
+                        TextButton(
+                          onPressed: _openDivina,
+                          child: const Text('Open DIVINA'),
                         ),
                         TextButton(
                           onPressed: _openWebPub,

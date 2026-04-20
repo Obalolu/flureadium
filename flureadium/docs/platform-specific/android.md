@@ -99,6 +99,7 @@ android/src/main/kotlin/dev/mulev/flureadium/
 ├── models/
 │   └── PdfReaderViewModel.kt    # PDF reader state
 └── navigators/
+    ├── ImageNavigator.kt        # CBZ / DIVINA navigation controller
     └── PdfNavigator.kt          # PDF navigation controller
 ```
 
@@ -136,7 +137,7 @@ class ReadiumReaderViewFactory(
 
 Uses Readium Kotlin Toolkit:
 - `Streamer` for EPUB parsing
-- `Navigator` for content display
+- `Navigator` for EPUB, PDF, and image-based content display
 - `TTS` and `MediaPlayer` for audio
 - `PdfiumNavigator` for PDF rendering (via Pdfium adapter)
 

@@ -15,3 +15,5 @@ Some ones prefixed with a number are self-produced by Nota.
 | 38533_overlay.webpub      | webpub/ebook      | Ebook /w MediaOverlays      |
 | 38533.audiobook           | webpub/audiobook  | Readium Audiobook           |
 | flatland_remote.audiobook | webpub/audiobook  | Readium Audiobook (remote)  |
+| sample_comic.cbz          | cbz               | Minimal image-based comic   |
+| sample_visual.divina      | divina            | Minimal visual narrative    |

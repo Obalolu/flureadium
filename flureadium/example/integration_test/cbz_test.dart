@@ -39,5 +39,31 @@ void main() {
 
       expect(find.byType(ReadiumReaderWidget), findsOneWidget);
     });
+
+    testWidgets('revisiting pages loads from cache without errors', (
+      tester,
+    ) async {
+      app.main(initialAsset: 'assets/pubs/sample_comic.cbz');
+      for (var i = 0; i < 15; i++) {
+        await tester.pump(const Duration(seconds: 1));
+        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
+      }
+
+      expect(find.byType(ReadiumReaderWidget), findsOneWidget);
+
+      // Navigate forward two pages
+      await tester.tap(find.text('→'));
+      await tester.pump(const Duration(seconds: 2));
+      await tester.tap(find.text('→'));
+      await tester.pump(const Duration(seconds: 2));
+
+      // Navigate back to previously visited pages (cache hit path on iOS)
+      await tester.tap(find.text('←'));
+      await tester.pump(const Duration(seconds: 2));
+      await tester.tap(find.text('←'));
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(find.byType(ReadiumReaderWidget), findsOneWidget);
+    });
   });
 }

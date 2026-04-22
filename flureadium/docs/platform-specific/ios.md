@@ -174,6 +174,22 @@ This is a native iOS layer change only. No Dart or Flutter changes are required.
 - `PdfReaderView.swift` - PDF reader using EdgeTapInterceptView
 - `ImageReaderView.swift` - CBZ / DIVINA reader using EdgeTapInterceptView
 
+### CBZ Image Caching
+
+Readium's CBZ navigator creates a new `ImageViewController` for every page turn, each fetching the full image from a local HTTP server via `URLSession.shared`. The server's `ResourceResponse` sets `Cache-Control: no-cache, no-store, must-revalidate` to protect DRM-enabled content, which prevents `URLCache` from storing responses. For CBZ and DiViNa publications (which have no DRM), this causes redundant ZIP extraction and HTTP round-trips on every swipe.
+
+`ImageCacheURLProtocol` is a `URLProtocol` subclass that transparently intercepts these localhost HTTP GET requests and caches image data in `NSCache`. On cache hit, images are served instantly from memory without any network or ZIP extraction overhead.
+
+**Scope:**
+- Intercepts only HTTP GET requests to `localhost` / `127.0.0.1` — EPUB (WKWebView), PDF (PDFKit), and external traffic are unaffected
+- Registered when `ImageReaderView` initializes, unregistered when it disposes
+- Cache is session-scoped: cleared automatically when the publication closes
+- Uses `NSCache` for automatic LRU eviction under memory pressure — no explicit size limit needed
+
+**Files:**
+- `ImageCacheURLProtocol.swift` — URLProtocol subclass with NSCache storage
+- `ImageReaderView.swift` — enable/disable calls in init and dispose
+
 ### Text Selection Copy
 
 When a user long-presses text in an EPUB or PDF reader, iOS shows a native

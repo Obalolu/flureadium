@@ -59,6 +59,8 @@ class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, Visu
     viewContainer = EdgeTapInterceptView()
     super.init()
 
+    ImageCacheURLProtocol.enable()
+
     channel.setMethodCallHandler(onMethodCall)
     imageViewController.delegate = self
 
@@ -192,6 +194,7 @@ class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, Visu
     case "isReaderReady":
       result(hasSentReady)
     case "dispose":
+      ImageCacheURLProtocol.disable()
       imageViewController.view.removeFromSuperview()
       imageViewController.delegate = nil
       readerStatusStreamHandler?.sendEvent(ImageReaderStatusClosed)

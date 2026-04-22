@@ -18,6 +18,8 @@ class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, Visu
   private let imageViewController: CBZNavigatorViewController
   private var hasSentReady = false
   private var navigationState = ImageReaderNavigationState()
+  private var visitedIndices = Set<Int>()
+  private var prefetchTask: Task<Void, Never>?
 
   func view() -> UIView {
     print(TAG, "::getView")
@@ -105,6 +107,12 @@ class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, Visu
       hasSentReady = true
     }
     emitOnPageChanged(locator: locator)
+
+    let readingOrder = imageViewController.publication.readingOrder
+    if let currentIndex = readingOrder.firstIndexWithHREF(locator.href) {
+      visitedIndices.insert(currentIndex)
+      prefetchAdjacentPages(around: currentIndex)
+    }
   }
 
   func getCurrentLocation() -> Locator? {
@@ -144,6 +152,35 @@ class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, Visu
         }
       }
     )
+  }
+
+  private func prefetchAdjacentPages(around currentIndex: Int) {
+    prefetchTask?.cancel()
+    let publication = imageViewController.publication
+    let readingOrder = publication.readingOrder
+    let adjacentIndices = [currentIndex - 1, currentIndex + 1, currentIndex + 2]
+    let visited = visitedIndices
+
+    prefetchTask = Task {
+      for index in adjacentIndices {
+        guard !Task.isCancelled else { return }
+        guard readingOrder.indices.contains(index) else { continue }
+        guard !visited.contains(index) else { continue }
+
+        let link = readingOrder[index]
+        guard !ImageCacheURLProtocol.hasPrefetch(href: link.href) else { continue }
+        guard let resource = publication.get(link) else { continue }
+
+        let result = await resource.read()
+        if let data = try? result.get() {
+          ImageCacheURLProtocol.seedPrefetch(
+            href: link.href,
+            data: data,
+            mimeType: link.mediaType?.string
+          )
+        }
+      }
+    }
   }
 
   private func emitOnPageChanged(locator: Locator) {
@@ -194,6 +231,9 @@ class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, Visu
     case "isReaderReady":
       result(hasSentReady)
     case "dispose":
+      prefetchTask?.cancel()
+      prefetchTask = nil
+      visitedIndices.removeAll()
       ImageCacheURLProtocol.disable()
       imageViewController.view.removeFromSuperview()
       imageViewController.delegate = nil

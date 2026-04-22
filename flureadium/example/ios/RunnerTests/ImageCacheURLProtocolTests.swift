@@ -112,4 +112,99 @@ final class ImageCacheURLProtocolTests: XCTestCase {
 
         waitForExpectations(timeout: 5)
     }
+
+    // MARK: - Prefetch store
+
+    func testSeedPrefetchStoresData() {
+        ImageCacheURLProtocol.seedPrefetch(href: "page.jpg", data: Data([0x01, 0x02]), mimeType: "image/jpeg")
+        XCTAssertTrue(ImageCacheURLProtocol.hasPrefetch(href: "page.jpg"))
+    }
+
+    func testHasPrefetchReturnsFalseForUnknown() {
+        XCTAssertFalse(ImageCacheURLProtocol.hasPrefetch(href: "unknown.jpg"))
+    }
+
+    func testClearPrefetchCacheRemovesAll() {
+        ImageCacheURLProtocol.seedPrefetch(href: "a.jpg", data: Data([0x01]), mimeType: "image/jpeg")
+        ImageCacheURLProtocol.seedPrefetch(href: "b.jpg", data: Data([0x02]), mimeType: "image/jpeg")
+        XCTAssertTrue(ImageCacheURLProtocol.hasPrefetch(href: "a.jpg"))
+        XCTAssertTrue(ImageCacheURLProtocol.hasPrefetch(href: "b.jpg"))
+
+        ImageCacheURLProtocol.clearPrefetchCache()
+
+        XCTAssertFalse(ImageCacheURLProtocol.hasPrefetch(href: "a.jpg"))
+        XCTAssertFalse(ImageCacheURLProtocol.hasPrefetch(href: "b.jpg"))
+    }
+
+    func testFindPrefetchMatchReturnsCachedDataForSuffixMatch() {
+        ImageCacheURLProtocol.seedPrefetch(href: "page.jpg", data: Data([0xAA]), mimeType: "image/jpeg")
+
+        let match = ImageCacheURLProtocol.findPrefetchMatchData(forPath: "/some-uuid/page.jpg")
+
+        XCTAssertNotNil(match)
+        XCTAssertEqual(match, Data([0xAA]))
+    }
+
+    func testFindPrefetchMatchReturnsCachedDataForSubdirectoryHref() {
+        ImageCacheURLProtocol.seedPrefetch(href: "images/page.jpg", data: Data([0xBB]), mimeType: "image/jpeg")
+
+        let match = ImageCacheURLProtocol.findPrefetchMatchData(forPath: "/some-uuid/images/page.jpg")
+
+        XCTAssertNotNil(match)
+        XCTAssertEqual(match, Data([0xBB]))
+    }
+
+    func testFindPrefetchMatchReturnsNilForNoMatch() {
+        ImageCacheURLProtocol.seedPrefetch(href: "page1.jpg", data: Data([0x01]), mimeType: "image/jpeg")
+
+        let match = ImageCacheURLProtocol.findPrefetchMatchData(forPath: "/some-uuid/page2.jpg")
+
+        XCTAssertNil(match)
+    }
+
+    func testFindPrefetchMatchHandlesPercentEncodedHrefs() {
+        ImageCacheURLProtocol.seedPrefetch(href: "My%20Image.jpg", data: Data([0xCC]), mimeType: "image/jpeg")
+
+        let match = ImageCacheURLProtocol.findPrefetchMatchData(forPath: "/some-uuid/My Image.jpg")
+
+        XCTAssertNotNil(match)
+        XCTAssertEqual(match, Data([0xCC]))
+    }
+
+    func testDisableClearsBothCaches() {
+        let url = URL(string: "http://localhost:19876/primary.jpg")!
+        ImageCacheURLProtocol.seedCache(url: url, data: Data([0x01]), mimeType: "image/jpeg")
+        ImageCacheURLProtocol.seedPrefetch(href: "prefetched.jpg", data: Data([0x02]), mimeType: "image/jpeg")
+        XCTAssertTrue(ImageCacheURLProtocol.hasCachedResponse(for: url))
+        XCTAssertTrue(ImageCacheURLProtocol.hasPrefetch(href: "prefetched.jpg"))
+
+        ImageCacheURLProtocol.disable()
+
+        XCTAssertFalse(ImageCacheURLProtocol.hasCachedResponse(for: url))
+        XCTAssertFalse(ImageCacheURLProtocol.hasPrefetch(href: "prefetched.jpg"))
+    }
+
+    func testPrefetchHitPromotesToPrimaryCache() {
+        let expectation = self.expectation(description: "Prefetch hit promotes")
+        let url = URL(string: "http://localhost:19876/prefetch-promote.jpg")!
+        let imageData = Data([0xFF, 0xD8, 0xFF, 0xE0])
+
+        ImageCacheURLProtocol.seedPrefetch(href: "prefetch-promote.jpg", data: imageData, mimeType: "image/jpeg")
+        ImageCacheURLProtocol.enable()
+
+        let task = URLSession.shared.dataTask(with: url) { data, _, error in
+            XCTAssertNil(error)
+            XCTAssertEqual(data, imageData)
+
+            // Promoted to primary cache
+            XCTAssertTrue(ImageCacheURLProtocol.hasCachedResponse(for: url))
+            // Removed from prefetch store
+            XCTAssertFalse(ImageCacheURLProtocol.hasPrefetch(href: "prefetch-promote.jpg"))
+
+            expectation.fulfill()
+        }
+        task.resume()
+
+        waitForExpectations(timeout: 5)
+    }
 }

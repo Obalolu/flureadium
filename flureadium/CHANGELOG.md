@@ -1,3 +1,15 @@
+## 0.10.1
+
+### Bug Fixes
+
+- **iOS CBZ navigation crash**: Fix `PlatformException(InvalidArgument, Failed to parse locator)` when navigating CBZ files with special characters in filenames. The Locator href encode/decode boundary in `flureadium_platform_interface` now normalizes hrefs correctly for native platform transport.
+
+### Documentation
+
+- Document href encoding behavior in the Locator API reference.
+
+---
+
 ## 0.10.0
 
 ### New Features

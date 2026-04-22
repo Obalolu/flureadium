@@ -181,7 +181,7 @@ for (final link in pub.resources) {
 
 ## Reading Modes
 
-Flureadium supports three reading modes:
+Flureadium supports four reading modes:
 
 ### 1. Visual Reading
 
@@ -233,6 +233,22 @@ await flureadium.play(null);
 await flureadium.audioSeekBy(Duration(seconds: 30));
 await flureadium.next();      // Next track
 await flureadium.previous();  // Previous track
+```
+
+### 4. Image-Based Reading
+
+Display CBZ comics and DIVINA visual narratives. The same `ReadiumReaderWidget` handles format detection and uses native image navigators on each platform.
+
+```dart
+// Open a CBZ or DIVINA file — same API as EPUB
+final comic = await flureadium.openPublication('comic.cbz');
+
+ReadiumReaderWidget(publication: comic);
+
+// Navigate pages
+await flureadium.goLeft();
+await flureadium.goRight();
+await flureadium.goToLocator(locator);
 ```
 
 ## Decorations

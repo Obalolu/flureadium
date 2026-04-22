@@ -143,8 +143,12 @@ flureadium.onTextLocatorChanged.listen((locator) {
 | EPUB 3 | Yes | Yes | Yes | Yes |
 | WebPub | Yes | Yes | Yes | Yes |
 | PDF | Android, iOS | - | - | - |
+| CBZ | Android, iOS | - | - | - |
+| DIVINA | Android, iOS | - | - | - |
 
-PDF support is available on Android (via Pdfium) and iOS (via PDFKit). See [documentation](docs/) for details.
+PDF support is available on Android (via Pdfium) and iOS (via PDFKit). Image-based
+publications use Readium's native image navigators on both platforms. See
+[documentation](docs/) for details.
 
 ## Web Development
 

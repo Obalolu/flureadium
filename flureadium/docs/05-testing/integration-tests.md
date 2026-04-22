@@ -6,11 +6,14 @@ Integration tests run the example app on a real device or simulator and assert w
 
 | File | Platforms | What it asserts |
 |---|---|---|
-| `all_tests.dart` | Android, iOS | Combined runner — imports all four files below into a single compilation unit |
+| `all_tests.dart` | Android, iOS | Combined runner — imports all files below into a single compilation unit |
+| `all_tests_android_ci.dart` | Android (CI) | CI runner — excludes TTS, audiobook, and WebPub tests requiring hardware audio or network |
 | `all_tests_web.dart` | Web | Web-specific runner — only includes tests that pass on web (see note below) |
 | `launch_test.dart` | All | App starts, MaterialApp renders |
 | `epub_test.dart` | Android, iOS | EPUB auto-opens, navigation/prefs/highlight don't crash, TTS sentence nav buttons appear, close removes widget |
 | `audiobook_test.dart` | Android, iOS (`@Tags(['native'])`) | Audiobook opens, play changes button label, seek doesn't crash, pause/resume button labels cycle correctly |
+| `cbz_test.dart` | Android, iOS | CBZ auto-opens, `ReadiumReaderWidget` present, left/right navigation works |
+| `divina_test.dart` | Android, iOS | DIVINA auto-opens, `ReadiumReaderWidget` present, left/right navigation works |
 | `webpub_test.dart` | Android, iOS | Remote WebPub manifest opens, `ReadiumReaderWidget` present |
 
 > **Always use `all_tests.dart` (mobile) or `all_tests_web.dart` (web) when running the full suite.** Running `flutter test integration_test/` without specifying a file compiles and installs each test file as a separate APK batch. On mobile this reinstalls the app mid-run, killing in-progress tests and causing "did not complete" failures for any tests that were running when the new APK landed.

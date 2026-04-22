@@ -4,6 +4,8 @@
 import 'package:integration_test/integration_test.dart';
 
 import 'launch_test.dart' as launch;
+import 'cbz_test.dart' as cbz;
+import 'divina_test.dart' as divina;
 import 'epub_test.dart' as epub;
 import 'error_handling_test.dart' as error_handling;
 
@@ -11,6 +13,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   launch.main();
+  cbz.main();
+  divina.main();
   epub.main();
   error_handling.main();
 }

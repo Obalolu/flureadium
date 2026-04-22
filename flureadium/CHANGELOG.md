@@ -1,3 +1,27 @@
+## 0.10.0
+
+### New Features
+
+- **CBZ and DIVINA support**: `ReadiumReaderWidget` renders image-based publications on Android and iOS. Format detection is automatic — same widget, same API, no Dart-side changes.
+- **Android**: `ImageNavigator` wraps Readium Kotlin's `ImageNavigatorFragment` with lifecycle management, state persistence, and locator tracking.
+- **iOS**: `ImageReaderView` wraps Readium Swift's `CBZNavigatorViewController` with edge-tap and swipe navigation, same UX as the PDF reader.
+
+### Testing
+
+- Android JVM tests for image navigator state, cleanup, routing detection, and saved-state persistence.
+- iOS XCTest coverage for navigation state, edge-tap config, and publication routing.
+- CBZ and DIVINA integration tests with bundled test fixtures, registered in `all_tests.dart` and `all_tests_android_ci.dart`.
+
+### Example App
+
+- "Open CBZ" and "Open DIVINA" buttons with bundled fixtures.
+- Configurable startup asset (`initialAsset` parameter) for integration test injection.
+
+### Documentation
+
+- Reader widget, Android, iOS, concepts, and integration test docs updated for image-based publications.
+- README format matrix now lists CBZ and DIVINA.
+
 ## 0.9.4
 
 ### Bug Fixes

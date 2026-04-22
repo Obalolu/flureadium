@@ -1,3 +1,15 @@
+## 0.10.2
+
+### Bug Fixes
+
+- **iOS CBZ page navigation performance**: Cache images from Readium's local server to eliminate redundant ZIP extraction and HTTP round-trips on every page turn. Adds `ImageCacheURLProtocol`, a URLProtocol subclass that intercepts localhost GET requests and serves cached images from NSCache. Cache is session-scoped and cleared when the reader closes.
+
+### Testing
+
+- iOS XCTest coverage for `ImageCacheURLProtocol`: canInit filtering, cache hit/miss, enable/disable lifecycle, clearCache.
+
+---
+
 ## 0.10.1
 
 ### Bug Fixes

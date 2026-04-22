@@ -180,15 +180,30 @@ Readium's CBZ navigator creates a new `ImageViewController` for every page turn,
 
 `ImageCacheURLProtocol` is a `URLProtocol` subclass that transparently intercepts these localhost HTTP GET requests and caches image data in `NSCache`. On cache hit, images are served instantly from memory without any network or ZIP extraction overhead.
 
-**Scope:**
+**Primary cache:**
 - Intercepts only HTTP GET requests to `localhost` / `127.0.0.1` — EPUB (WKWebView), PDF (PDFKit), and external traffic are unaffected
 - Registered when `ImageReaderView` initializes, unregistered when it disposes
 - Cache is session-scoped: cleared automatically when the publication closes
-- Uses `NSCache` for automatic LRU eviction under memory pressure — no explicit size limit needed
+- `NSCache` with explicit limits: 100 MB total cost, 30-entry count limit
+
+**Prefetch cache:**
+
+After each page turn, `ImageReaderView` reads adjacent pages (N-1, N+1, N+2) directly from the ZIP container via `Publication.get(link)` and stores them in a secondary prefetch dictionary inside `ImageCacheURLProtocol`. This bypasses the HTTP server entirely — for CBZ files using ZIP STORE (no compression), it's a fast memory copy.
+
+When Readium's `ImageViewController` loads a page, `ImageCacheURLProtocol.startLoading()` checks the prefetch store after a primary cache miss. On hit, the data is served instantly, promoted to the primary `NSCache`, and removed from the prefetch store. This eliminates the visible blank flash during page transitions.
+
+Prefetch skips:
+- Pages already visited (tracked via `visitedIndices` — already in primary cache)
+- Pages already prefetched (checked via `hasPrefetch(href:)`)
+- Out-of-range indices
+
+The prefetch store is a small thread-safe dictionary (typically 3 entries), synchronized with `NSLock`. URL matching uses path suffix comparison with percent-decoding to handle all encoding combinations.
+
+Fast swiping is handled by cancelling the in-flight prefetch task on each new page turn, preventing wasted I/O on pages the user has already passed. All prefetch state (task, visited indices, store) is cleared on dispose.
 
 **Files:**
-- `ImageCacheURLProtocol.swift` — URLProtocol subclass with NSCache storage
-- `ImageReaderView.swift` — enable/disable calls in init and dispose
+- `ImageCacheURLProtocol.swift` — URLProtocol subclass with primary NSCache + secondary prefetch store
+- `ImageReaderView.swift` — enable/disable calls in init and dispose, prefetch logic in `locationDidChange`
 
 ### Text Selection Copy
 

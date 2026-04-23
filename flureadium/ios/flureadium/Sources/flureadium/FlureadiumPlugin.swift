@@ -90,6 +90,14 @@ public class FlureadiumPlugin: NSObject, FlutterPlugin, ReadiumShared.WarningLog
 
       Task.detached(priority: .high) {
         do {
+          // Fast path: if the same publication is already open, return its manifest.
+          if let existingPub = currentPublication,
+             currentPublicationUrlStr == pubUrlStr {
+            let jsonManifest = existingPub.jsonManifest
+            await MainActor.run { result(jsonManifest) }
+            return
+          }
+
           if (currentPublication != nil) {
             await self.closePublication()
           }

@@ -81,7 +81,7 @@ class Locator extends AdditionalProperties
     final text = LocatorText.fromJson(json.optJsonObject('text'));
 
     return Locator(
-      href: href,
+      href: Uri.decodeFull(href),
       type: type,
       title: title,
       locations: locations,
@@ -93,10 +93,11 @@ class Locator extends AdditionalProperties
   String get json => JsonCodec().encode(toJson());
 
   @override
-  Map<String, dynamic> toJson() => {'href': href, 'type': type}
-    ..putOpt('title', title)
-    ..putJSONableIfNotEmpty('locations', locations)
-    ..putJSONableIfNotEmpty('text', text);
+  Map<String, dynamic> toJson() =>
+      {'href': Uri.encodeFull(Uri.decodeFull(href)), 'type': type}
+        ..putOpt('title', title)
+        ..putJSONableIfNotEmpty('locations', locations)
+        ..putJSONableIfNotEmpty('text', text);
 
   Locator copyWith({
     String? href,

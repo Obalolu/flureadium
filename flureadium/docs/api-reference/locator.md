@@ -23,7 +23,7 @@ Locator(
 
 **Type:** `String` (required)
 
-The path to the content document within the publication.
+The path to the content document within the publication. Internally, `href` is always stored in decoded form (e.g. `Happiness v01 [HD].jpg`). When serialized via `toJson()`, the value is percent-encoded for safe transport to native platforms (e.g. `Happiness%20v01%20%5BHD%5D.jpg`). `fromJson()` automatically decodes percent-encoded hrefs on parse.
 
 ```dart
 print(locator.href);  // "chapter1.xhtml"

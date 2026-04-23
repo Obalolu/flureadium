@@ -284,6 +284,96 @@ void main() {
       });
     });
 
+    group('href encoding', () {
+      test('fromJson decodes percent-encoded href', () {
+        final json = {
+          'href': 'Happiness%20v01%20%5BHD%5D.jpg',
+          'type': 'image/jpeg',
+        };
+
+        final locator = Locator.fromJson(json);
+
+        expect(locator, isNotNull);
+        expect(locator!.href, equals('Happiness v01 [HD].jpg'));
+      });
+
+      test('fromJson decodes href with spaces only', () {
+        final json = {'href': 'my%20chapter.xhtml', 'type': 'text/html'};
+
+        final locator = Locator.fromJson(json);
+
+        expect(locator, isNotNull);
+        expect(locator!.href, equals('my chapter.xhtml'));
+      });
+
+      test('fromJson preserves already-decoded href', () {
+        final json = {'href': 'chapter1.xhtml', 'type': 'text/html'};
+
+        final locator = Locator.fromJson(json);
+
+        expect(locator, isNotNull);
+        expect(locator!.href, equals('chapter1.xhtml'));
+      });
+
+      test('toJson encodes decoded href with special characters', () {
+        final locator = Locator(
+          href: '/Happiness - c001 [HD].jpg',
+          type: 'image/jpeg',
+        );
+
+        final json = locator.toJson();
+
+        expect(json['href'], equals('/Happiness%20-%20c001%20%5BHD%5D.jpg'));
+      });
+
+      test('toJson encodes brackets in href', () {
+        final locator = Locator(href: 'page[1].jpg', type: 'image/jpeg');
+
+        final json = locator.toJson();
+
+        expect(json['href'], equals('page%5B1%5D.jpg'));
+      });
+
+      test('toJson preserves simple href unchanged', () {
+        final locator = Locator(href: 'chapter1.xhtml', type: 'text/html');
+
+        final json = locator.toJson();
+
+        expect(json['href'], equals('chapter1.xhtml'));
+      });
+
+      test(
+        'roundtrip: encoded JSON → fromJson → toJson → same encoded JSON',
+        () {
+          final originalJson = {
+            'href': 'file%20name%20%5Btag%5D.jpg',
+            'type': 'image/jpeg',
+          };
+
+          final locator = Locator.fromJson(originalJson);
+          final reserialized = locator!.toJson();
+
+          expect(reserialized['href'], equals('file%20name%20%5Btag%5D.jpg'));
+        },
+      );
+
+      test(
+        'roundtrip: decoded constructor → toJson → fromJson → same decoded internal',
+        () {
+          final original = Locator(
+            href: 'file name [tag].jpg',
+            type: 'image/jpeg',
+          );
+
+          final json = original.toJson();
+          final restored = Locator.fromJson(json);
+
+          expect(restored, isNotNull);
+          expect(restored!.href, equals('file name [tag].jpg'));
+        },
+      );
+    });
+
     group('equality', () {
       test('equal locators have same hashCode', () {
         final locator1 = Locator(

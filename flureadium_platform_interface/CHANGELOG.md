@@ -1,3 +1,15 @@
+## 0.6.1
+
+### Bug Fixes
+
+- **Locator href encoding**: `Locator.fromJson` now decodes percent-encoded hrefs so the internal representation is always in decoded form. `Locator.toJson` encodes hrefs for safe transport to native platforms. Fixes `PlatformException(InvalidArgument, Failed to parse locator)` on iOS when navigating CBZ files with special characters (spaces, brackets) in filenames.
+
+### Testing
+
+- Add 8 unit tests for href encoding: fromJson decoding, toJson encoding, roundtrip idempotency, and edge cases (spaces-only, brackets-only, mixed special characters).
+
+---
+
 ## 0.6.0
 
 ### New Features

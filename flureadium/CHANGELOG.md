@@ -1,3 +1,19 @@
+## 0.10.3
+
+### Performance
+
+- **CBZ/DIVINA page turn speed**: Forward the `animated` parameter from `ReadiumReaderWidget.goLeft()`/`goRight()` through the method channel so callers can disable page turn animation. Previously the parameter was accepted but silently dropped, and the channel always animated.
+- **iOS CBZ edge-tap instant page turns**: Edge-tap and swipe handlers in `ImageReaderView` now use `animated: false`, eliminating the ~300ms `UIPageViewController` transition on every tap.
+- **Same-publication cache (iOS + Android)**: `openPublication` returns the already-loaded publication when called with the same URL, skipping redundant ZIP parsing and manifest construction. Eliminates ~3.9s re-open latency when resuming a CBZ/DIVINA book.
+
+### Testing
+
+- Dart unit tests for `animated` parameter forwarding in `goLeft`/`goRight`.
+- Android Robolectric tests for same-publication cache: cache hit, cache miss (different URL), cache miss (no current publication).
+- DIVINA cache integration test.
+
+---
+
 ## 0.10.2
 
 ### Bug Fixes

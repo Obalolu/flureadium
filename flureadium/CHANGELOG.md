@@ -1,4 +1,15 @@
-## 0.10.3
+## 0.10.0
+
+### New Features
+
+- **CBZ and DIVINA support**: `ReadiumReaderWidget` renders image-based publications on Android and iOS. Format detection is automatic — same widget, same API, no Dart-side changes.
+- **Android**: `ImageNavigator` wraps Readium Kotlin's `ImageNavigatorFragment` with lifecycle management, state persistence, and locator tracking.
+- **iOS**: `ImageReaderView` wraps Readium Swift's `CBZNavigatorViewController` with edge-tap and swipe navigation, same UX as the PDF reader.
+
+### Bug Fixes
+
+- **iOS CBZ navigation crash**: Fix `PlatformException(InvalidArgument, Failed to parse locator)` when navigating CBZ files with special characters in filenames. The Locator href encode/decode boundary in `flureadium_platform_interface` now normalizes hrefs correctly for native platform transport.
+- **iOS CBZ page navigation performance**: Cache images from Readium's local server to eliminate redundant ZIP extraction and HTTP round-trips on every page turn. Adds `ImageCacheURLProtocol`, a URLProtocol subclass that intercepts localhost GET requests and serves cached images from NSCache. Cache is session-scoped and cleared when the reader closes.
 
 ### Performance
 
@@ -8,49 +19,13 @@
 
 ### Testing
 
-- Dart unit tests for `animated` parameter forwarding in `goLeft`/`goRight`.
-- Android Robolectric tests for same-publication cache: cache hit, cache miss (different URL), cache miss (no current publication).
-- DIVINA cache integration test.
-
----
-
-## 0.10.2
-
-### Bug Fixes
-
-- **iOS CBZ page navigation performance**: Cache images from Readium's local server to eliminate redundant ZIP extraction and HTTP round-trips on every page turn. Adds `ImageCacheURLProtocol`, a URLProtocol subclass that intercepts localhost GET requests and serves cached images from NSCache. Cache is session-scoped and cleared when the reader closes.
-
-### Testing
-
-- iOS XCTest coverage for `ImageCacheURLProtocol`: canInit filtering, cache hit/miss, enable/disable lifecycle, clearCache.
-
----
-
-## 0.10.1
-
-### Bug Fixes
-
-- **iOS CBZ navigation crash**: Fix `PlatformException(InvalidArgument, Failed to parse locator)` when navigating CBZ files with special characters in filenames. The Locator href encode/decode boundary in `flureadium_platform_interface` now normalizes hrefs correctly for native platform transport.
-
-### Documentation
-
-- Document href encoding behavior in the Locator API reference.
-
----
-
-## 0.10.0
-
-### New Features
-
-- **CBZ and DIVINA support**: `ReadiumReaderWidget` renders image-based publications on Android and iOS. Format detection is automatic — same widget, same API, no Dart-side changes.
-- **Android**: `ImageNavigator` wraps Readium Kotlin's `ImageNavigatorFragment` with lifecycle management, state persistence, and locator tracking.
-- **iOS**: `ImageReaderView` wraps Readium Swift's `CBZNavigatorViewController` with edge-tap and swipe navigation, same UX as the PDF reader.
-
-### Testing
-
 - Android JVM tests for image navigator state, cleanup, routing detection, and saved-state persistence.
 - iOS XCTest coverage for navigation state, edge-tap config, and publication routing.
 - CBZ and DIVINA integration tests with bundled test fixtures, registered in `all_tests.dart` and `all_tests_android_ci.dart`.
+- iOS XCTest coverage for `ImageCacheURLProtocol`: canInit filtering, cache hit/miss, enable/disable lifecycle, clearCache.
+- Dart unit tests for `animated` parameter forwarding in `goLeft`/`goRight`.
+- Android Robolectric tests for same-publication cache: cache hit, cache miss (different URL), cache miss (no current publication).
+- DIVINA cache integration test.
 
 ### Example App
 
@@ -61,6 +36,7 @@
 
 - Reader widget, Android, iOS, concepts, and integration test docs updated for image-based publications.
 - README format matrix now lists CBZ and DIVINA.
+- Document href encoding behavior in the Locator API reference.
 
 ## 0.9.4
 

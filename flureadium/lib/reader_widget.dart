@@ -154,11 +154,12 @@ class _ReadiumReaderWidgetState extends State<ReadiumReaderWidget>
   }
 
   @override
-  Future<void> goLeft({final bool animated = true}) async => _channel?.goLeft();
+  Future<void> goLeft({final bool animated = true}) async =>
+      _channel?.goLeft(animated: animated);
 
   @override
   Future<void> goRight({final bool animated = true}) async =>
-      _channel?.goRight();
+      _channel?.goRight(animated: animated);
 
   @override
   Future<void> skipToNext({final bool animated = true}) async {

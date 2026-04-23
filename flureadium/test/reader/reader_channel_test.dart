@@ -120,6 +120,42 @@ void main() {
     });
   });
 
+  group('goLeft', () {
+    test('forwards animated: true by default', () async {
+      await channel.goLeft();
+
+      expect(log, hasLength(1));
+      expect(log.first.method, equals('goLeft'));
+      expect(log.first.arguments, isTrue);
+    });
+
+    test('forwards animated: false when explicitly passed', () async {
+      await channel.goLeft(animated: false);
+
+      expect(log, hasLength(1));
+      expect(log.first.method, equals('goLeft'));
+      expect(log.first.arguments, isFalse);
+    });
+  });
+
+  group('goRight', () {
+    test('forwards animated: true by default', () async {
+      await channel.goRight();
+
+      expect(log, hasLength(1));
+      expect(log.first.method, equals('goRight'));
+      expect(log.first.arguments, isTrue);
+    });
+
+    test('forwards animated: false when explicitly passed', () async {
+      await channel.goRight(animated: false);
+
+      expect(log, hasLength(1));
+      expect(log.first.method, equals('goRight'));
+      expect(log.first.arguments, isFalse);
+    });
+  });
+
   group('native callbacks', () {
     test('forwards external link callback from native method call', () async {
       String? seen;

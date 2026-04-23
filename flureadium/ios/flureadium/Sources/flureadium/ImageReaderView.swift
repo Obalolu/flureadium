@@ -130,25 +130,25 @@ class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, Visu
       onLeftEdgeTap: { [weak self] in
         guard let self else { return }
         Task { @MainActor in
-          let _ = await self.imageViewController.goLeft(options: NavigatorGoOptions(animated: true))
+          let _ = await self.imageViewController.goLeft(options: NavigatorGoOptions(animated: false))
         }
       },
       onRightEdgeTap: { [weak self] in
         guard let self else { return }
         Task { @MainActor in
-          let _ = await self.imageViewController.goRight(options: NavigatorGoOptions(animated: true))
+          let _ = await self.imageViewController.goRight(options: NavigatorGoOptions(animated: false))
         }
       },
       onSwipeLeft: { [weak self] in
         guard let self else { return }
         Task { @MainActor in
-          let _ = await self.imageViewController.goRight(options: NavigatorGoOptions(animated: true))
+          let _ = await self.imageViewController.goRight(options: NavigatorGoOptions(animated: false))
         }
       },
       onSwipeRight: { [weak self] in
         guard let self else { return }
         Task { @MainActor in
-          let _ = await self.imageViewController.goLeft(options: NavigatorGoOptions(animated: true))
+          let _ = await self.imageViewController.goLeft(options: NavigatorGoOptions(animated: false))
         }
       }
     )

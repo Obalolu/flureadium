@@ -576,6 +576,11 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
     suspend fun openPublication(
         pubUrl: AbsoluteUrl
     ): Try<Publication, PublicationError> {
+        // Fast path: if the same publication is already open, return it.
+        _currentPublication?.let { cached ->
+            if (currentPublicationUrl == pubUrl.toString()) return Try.success(cached)
+        }
+
         val pub = loadPublication(pubUrl).getOrElse { e -> return failure(e) }
 
         // Release all active navigators before switching publications.

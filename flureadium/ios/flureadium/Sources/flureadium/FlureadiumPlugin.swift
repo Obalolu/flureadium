@@ -373,9 +373,19 @@ public class FlureadiumPlugin: NSObject, FlutterPlugin, ReadiumShared.WarningLog
         if (self.timebasedNavigator != nil) {
           navigated = await self.timebasedNavigator?.seek(toLocator: locator) ?? false
         }
-        // ReaderView goTo
+        // ReaderView goTo (EPUB)
         else if (currentReaderView != nil) {
           await currentReaderView?.goToLocator(locator: locator, animated: false)
+          navigated = true
+        }
+        // ImageReaderView goTo (CBZ / DiViNa)
+        else if (currentImageReaderView != nil) {
+          await currentImageReaderView?.goToLocator(locator: locator, animated: false)
+          navigated = true
+        }
+        // PdfReaderView goTo
+        else if (currentPdfReaderView != nil) {
+          await currentPdfReaderView?.goToLocator(locator: locator, animated: false)
           navigated = true
         }
         await MainActor.run { [navigated] in

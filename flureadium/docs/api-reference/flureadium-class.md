@@ -464,6 +464,45 @@ if (coverBytes != null) {
 }
 ```
 
+### extractPageThumbnail
+
+Returns a downscaled JPEG thumbnail of a resource in the currently open publication.
+
+```dart
+Future<Uint8List?> extractPageThumbnail(
+  String href,
+  int maxHeight,
+  int quality,
+)
+```
+
+**Parameters:**
+- `href` - Resource href from `Publication.readingOrder` or `Publication.tableOfContents`
+- `maxHeight` - Caps the longer side of the output image, in pixels
+- `quality` - JPEG quality, 0-100
+
+**Returns:** JPEG bytes, or `null` if the publication is closed, the href is unknown, or the resource fails to decode.
+
+The decode runs on a background queue (`DispatchQueue.global(.userInitiated)` on iOS, `Dispatchers.IO` on Android), so concurrent calls do not block the main thread. The native side reuses the already-mounted publication, so LCP-decryption and streaming work without extra setup.
+
+Use this for TOC thumbnails or any UI that needs a small bitmap for an arbitrary page. Avoid `ui.instantiateImageCodec` inside `Isolate.spawn` workers: the image decoder registry is not initialised there, even with `BackgroundIsolateBinaryMessenger.ensureInitialized`.
+
+**Platform notes:**
+- iOS: `CGImageSourceCreateThumbnailAtIndex` with `kCGImageSourceThumbnailMaxPixelSize`. The thumbnail is decoded directly from the JPEG without loading the full image.
+- Android: `BitmapFactory` with `inJustDecodeBounds` for the bounds pass, `inSampleSize` for the decode pass, then `Bitmap.compress(JPEG, quality, ...)`.
+- Web: returns `null`. No decoder is wired up.
+
+If the publication is closed while the call is in flight, the future resolves to `null` instead of throwing.
+
+**Example:**
+```dart
+final href = pub.readingOrder.first.href;
+final bytes = await flureadium.extractPageThumbnail(href, 80, 70);
+if (bytes != null) {
+  // render via Image.memory(bytes) or cache to disk
+}
+```
+
 ---
 
 ## Audiobook

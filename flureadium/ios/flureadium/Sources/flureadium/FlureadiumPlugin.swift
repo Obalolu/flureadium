@@ -184,12 +184,12 @@ public class FlureadiumPlugin: NSObject, FlutterPlugin, ReadiumShared.WarningLog
           message: "extractPageThumbnail requires [href: String, maxHeight: Int, quality: Int]",
           details: nil))
       }
-      guard let publication = currentPublication else {
+      guard let publication = currentPublication,
+            let url = AnyURL(legacyHREF: href) else {
         return result(nil)
       }
-      let link = Link(href: href)
       Task.detached(priority: .userInitiated) {
-        let resource = publication.get(link)
+        let resource = publication.get(url)
         guard let data = try? await resource?.read().get() else {
           await MainActor.run { result(nil) }
           return

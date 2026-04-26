@@ -461,7 +461,7 @@ internal class PublicationMethodCallHandler() :
         val publication = ReadiumReader.currentPublication
             ?: return Try.success(null)
         val url = Url.invoke(href) ?: return Try.success(null)
-        val resource = publication.get(Link(url)) ?: return Try.success(null)
+        val resource = publication.get(url) ?: return Try.success(null)
         val resourceBytes = resource.read().getOrElse { return Try.success(null) }
         return Try.success(PageThumbnailExtractor.extract(resourceBytes, maxHeight, quality))
     }

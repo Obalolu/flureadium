@@ -18,6 +18,7 @@ import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.util.Try
+import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.util.getOrElse
 import kotlin.time.Duration
 
@@ -261,6 +262,14 @@ internal class PublicationMethodCallHandler() :
                 return renderFirstPage(pubUrlStr, maxWidth, maxHeight)
             }
 
+            "extractPageThumbnail" -> {
+                val args = arguments as List<Any?>
+                val href = args[0] as String
+                val maxHeight = args[1] as Int
+                val quality = args[2] as Int
+                return extractPageThumbnail(href, maxHeight, quality)
+            }
+
             else -> {
                 throw NotImplementedError()
             }
@@ -438,6 +447,23 @@ internal class PublicationMethodCallHandler() :
 
         ReadiumReader.audioEnable(locator, preferences)
         return Try.success(null)
+    }
+
+    /**
+     * Extract a downscaled JPEG thumbnail from the resource at [href] in the open publication.
+     * Returns null if no publication is open, the resource is missing/unreadable, or decode fails.
+     */
+    private suspend fun extractPageThumbnail(
+        href: String,
+        maxHeight: Int,
+        quality: Int,
+    ): Try<ByteArray?, PublicationError> {
+        val publication = ReadiumReader.currentPublication
+            ?: return Try.success(null)
+        val url = Url.invoke(href) ?: return Try.success(null)
+        val resource = publication.get(Link(url)) ?: return Try.success(null)
+        val resourceBytes = resource.read().getOrElse { return Try.success(null) }
+        return Try.success(PageThumbnailExtractor.extract(resourceBytes, maxHeight, quality))
     }
 
     /**

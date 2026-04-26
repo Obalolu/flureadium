@@ -113,6 +113,22 @@ abstract class FlureadiumPlatform extends PlatformInterface {
   Future<bool> goToLocator(Locator locator) =>
       throw UnimplementedError('goToLocator() has not been implemented.');
 
+  /// Extracts a downscaled JPEG thumbnail of a publication resource.
+  ///
+  /// [href] is the resource href as it appears in `Publication.readingOrder` or
+  /// `Publication.tableOfContents`. [maxHeight] caps the longest side of the
+  /// output image in pixels. [quality] is the JPEG quality (0-100).
+  ///
+  /// Returns null if the publication is closed, the href cannot be resolved,
+  /// or the resource cannot be decoded as an image.
+  Future<Uint8List?> extractPageThumbnail(
+    String href,
+    int maxHeight,
+    int quality,
+  ) => throw UnimplementedError(
+    'extractPageThumbnail() has not been implemented.',
+  );
+
   // COMMON PLAYBACK API - BEGIN
   /// Play the publication from the given locator, or resume if null.
   Future<void> play(Locator? fromLocator) =>

@@ -101,6 +101,81 @@ void main() {
       });
     });
 
+    group('extractPageThumbnail', () {
+      test('sends correct method and arguments', () async {
+        await platform.extractPageThumbnail('page1.jpg', 80, 70);
+
+        expect(methodCalls.length, equals(1));
+        expect(methodCalls.last.method, equals('extractPageThumbnail'));
+        expect(methodCalls.last.arguments, equals(['page1.jpg', 80, 70]));
+      });
+
+      test('returns Uint8List when channel returns bytes', () async {
+        final fakeBytes = Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0]);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(platform.methodChannel, (call) async {
+              methodCalls.add(call);
+              if (call.method == 'extractPageThumbnail') {
+                return fakeBytes;
+              }
+              return _mockResponse(call);
+            });
+
+        final result = await platform.extractPageThumbnail('page1.jpg', 80, 70);
+
+        expect(result, equals(fakeBytes));
+      });
+
+      test('returns null when channel returns null', () async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(platform.methodChannel, (call) async {
+              methodCalls.add(call);
+              if (call.method == 'extractPageThumbnail') {
+                return null;
+              }
+              return _mockResponse(call);
+            });
+
+        final result = await platform.extractPageThumbnail(
+          'missing.jpg',
+          80,
+          70,
+        );
+
+        expect(result, isNull);
+      });
+
+      test('propagates PlatformException from native', () async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(platform.methodChannel, (call) async {
+              methodCalls.add(call);
+              if (call.method == 'extractPageThumbnail') {
+                throw PlatformException(
+                  code: 'DECODE_FAILED',
+                  message: 'Could not decode image',
+                );
+              }
+              return _mockResponse(call);
+            });
+
+        expect(
+          () => platform.extractPageThumbnail('bad.jpg', 80, 70),
+          throwsA(isA<PlatformException>()),
+        );
+      });
+    });
+
+    group('FlureadiumPlatform default implementation', () {
+      test('extractPageThumbnail throws UnimplementedError by default', () {
+        final fakePlatform = _FakeFlureadiumPlatform();
+
+        expect(
+          () => fakePlatform.extractPageThumbnail('page1.jpg', 80, 70),
+          throwsA(isA<UnimplementedError>()),
+        );
+      });
+    });
+
     group('TTS API', () {
       test('ttsEnable sends preferences and locator', () async {
         final prefs = TTSPreferences(
@@ -525,6 +600,12 @@ dynamic _mockResponse(MethodCall call) {
     default:
       return null;
   }
+}
+
+/// Minimal concrete subclass to verify [FlureadiumPlatform] default impls.
+class _FakeFlureadiumPlatform extends FlureadiumPlatform {
+  @override
+  Future<String?> getLinkContent(Link link) async => null;
 }
 
 class MockReaderWidget implements ReadiumReaderWidgetInterface {

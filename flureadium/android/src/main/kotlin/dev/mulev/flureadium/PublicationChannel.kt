@@ -19,6 +19,7 @@ import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.util.Try
 import org.readium.r2.shared.util.Url
+import org.readium.r2.shared.util.fromLegacyHref
 import org.readium.r2.shared.util.getOrElse
 import kotlin.time.Duration
 
@@ -204,9 +205,9 @@ internal class PublicationMethodCallHandler() :
                     throw Exception("goToLocator: failed to go to locator. Missing locator: ${args[0]} ")
                 }
 
-                ReadiumReader.goToLocator(locator)
+                val navigated = ReadiumReader.goToLocator(locator)
 
-                return Try.success(null)
+                return Try.success(navigated)
             }
 
             "getLinkContent" -> {
@@ -460,7 +461,10 @@ internal class PublicationMethodCallHandler() :
     ): Try<ByteArray?, PublicationError> {
         val publication = ReadiumReader.currentPublication
             ?: return Try.success(null)
-        val url = Url.invoke(href) ?: return Try.success(null)
+        // Use fromLegacyHref to match iOS AnyURL(legacyHREF:) — strips a
+        // leading '/' the Dart Publication.fromJson normalizer adds and
+        // percent-encodes the path before container lookup.
+        val url = Url.fromLegacyHref(href) ?: return Try.success(null)
         val resource = publication.get(url) ?: return Try.success(null)
         val resourceBytes = resource.read().getOrElse { return Try.success(null) }
         return Try.success(PageThumbnailExtractor.extract(resourceBytes, maxHeight, quality))

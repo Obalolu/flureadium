@@ -13,14 +13,18 @@ package dev.mulev.flureadium
  */
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -29,6 +33,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.CommandButton
+import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
@@ -60,6 +65,9 @@ private const val TAG = "Flutter_Readium.MediaService"
 
 private const val CUSTOM_COMMAND_REWIND_ACTION_ID = "REWIND_CUSTOM"
 private const val CUSTOM_COMMAND_FORWARD_ACTION_ID = "FORWARD_CUSTOM"
+private const val STARTUP_NOTIFICATION_CHANNEL_NAME = "Media playback"
+private const val STARTUP_NOTIFICATION_TITLE = "Flureadium playback"
+private const val STARTUP_NOTIFICATION_TEXT = "Preparing playback"
 
 @UnstableApi
 enum class NotificationPlayerCustomCommandButton(
@@ -253,6 +261,7 @@ class PluginMediaService : MediaSessionService(), MediaSession.Callback {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        enterForegroundForStartup()
         super.onStartCommand(intent, flags, startId)
 
         // TODO: Handle restoration properly when activated from a stale notification.
@@ -279,6 +288,42 @@ class PluginMediaService : MediaSessionService(), MediaSession.Callback {
 
         // Prevents the service from being automatically restarted after being killed;
         return START_NOT_STICKY
+    }
+
+    private fun enterForegroundForStartup() {
+        ensureStartupNotificationChannel()
+
+        val notification = NotificationCompat.Builder(
+            this,
+            DefaultMediaNotificationProvider.DEFAULT_CHANNEL_ID
+        )
+            .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_play)
+            .setContentTitle(STARTUP_NOTIFICATION_TITLE)
+            .setContentText(STARTUP_NOTIFICATION_TEXT)
+            .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setSilent(true)
+            .build()
+
+        ServiceCompat.startForeground(
+            this,
+            DefaultMediaNotificationProvider.DEFAULT_NOTIFICATION_ID,
+            notification,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+        )
+    }
+
+    private fun ensureStartupNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        val channel = NotificationChannel(
+            DefaultMediaNotificationProvider.DEFAULT_CHANNEL_ID,
+            STARTUP_NOTIFICATION_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_LOW
+        )
+        notificationManager.createNotificationChannel(channel)
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {

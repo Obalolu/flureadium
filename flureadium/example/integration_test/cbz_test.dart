@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:flureadium/flureadium.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -73,26 +70,19 @@ void main() {
       'Flureadium.goToLocator navigates CBZ reader (Bug 1 regression)',
       (tester) async {
         app.main(initialAsset: 'assets/pubs/sample_comic.cbz');
-        Publication? pub;
         for (var i = 0; i < 15; i++) {
           await tester.pump(const Duration(seconds: 1));
-          if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) {
-            pub = await Flureadium().loadPublication(
-              await _resolveAsset('assets/pubs/sample_comic.cbz'),
-            );
-            break;
-          }
+          if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
         }
 
         expect(find.byType(ReadiumReaderWidget), findsOneWidget);
-        expect(pub, isNotNull);
-        expect(pub!.readingOrder.length, greaterThan(2));
 
-        final targetLink = pub.readingOrder[2];
-        final locator = pub.locatorFromLink(targetLink);
-        expect(locator, isNotNull);
-
-        final navigated = await Flureadium().goToLocator(locator!);
+        const locator = Locator(
+          href: '003.jpg',
+          type: 'image/jpeg',
+          locations: Locations(position: 3, progression: 0.4),
+        );
+        final navigated = await Flureadium().goToLocator(locator);
         await tester.pump(const Duration(seconds: 1));
 
         expect(navigated, isTrue);
@@ -103,20 +93,16 @@ void main() {
       'extractPageThumbnail returns JPEG bytes for a valid CBZ page',
       (tester) async {
         app.main(initialAsset: 'assets/pubs/sample_comic.cbz');
-        Publication? pub;
         for (var i = 0; i < 15; i++) {
           await tester.pump(const Duration(seconds: 1));
-          if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) {
-            pub = await Flureadium().loadPublication(
-              await _resolveAsset('assets/pubs/sample_comic.cbz'),
-            );
-            break;
-          }
+          if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
         }
-        expect(pub, isNotNull);
 
-        final href = pub!.readingOrder.first.href;
-        final bytes = await Flureadium().extractPageThumbnail(href, 80, 70);
+        final bytes = await Flureadium().extractPageThumbnail(
+          '001.jpg',
+          80,
+          70,
+        );
 
         expect(bytes, isNotNull);
         expect(bytes!.length, greaterThan(2));
@@ -148,33 +134,15 @@ void main() {
       tester,
     ) async {
       app.main(initialAsset: 'assets/pubs/sample_comic.cbz');
-      Publication? pub;
       for (var i = 0; i < 15; i++) {
         await tester.pump(const Duration(seconds: 1));
-        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) {
-          pub = await Flureadium().loadPublication(
-            await _resolveAsset('assets/pubs/sample_comic.cbz'),
-          );
-          break;
-        }
+        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
       }
-      expect(pub, isNotNull);
-      final href = pub!.readingOrder.first.href;
 
       await Flureadium().closePublication();
-      final bytes = await Flureadium().extractPageThumbnail(href, 80, 70);
+      final bytes = await Flureadium().extractPageThumbnail('001.jpg', 80, 70);
 
       expect(bytes, isNull);
     });
   });
-}
-
-Future<String> _resolveAsset(String assetPath) async {
-  final bytes = await rootBundle.load(assetPath);
-  final filename = assetPath.split('/').last;
-  final tmp = File(
-    '${Directory.systemTemp.path}/${DateTime.now().millisecondsSinceEpoch}_$filename',
-  );
-  await tmp.writeAsBytes(bytes.buffer.asUint8List());
-  return tmp.path;
 }

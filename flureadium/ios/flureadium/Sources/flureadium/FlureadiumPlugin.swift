@@ -412,8 +412,7 @@ public class FlureadiumPlugin: NSObject, FlutterPlugin, ReadiumShared.WarningLog
         }
         // ImageReaderView goTo (CBZ / DiViNa)
         else if (currentImageReaderView != nil) {
-          await currentImageReaderView?.goToLocator(locator: locator, animated: false)
-          navigated = true
+          navigated = await currentImageReaderView?.goToLocator(locator: locator, animated: false) ?? false
         }
         // PdfReaderView goTo
         else if (currentPdfReaderView != nil) {

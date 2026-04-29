@@ -24,6 +24,7 @@ class MockFlureadiumPlatform
   List<ReaderTTSVoice> mockVoices = [];
   bool mockGoToLocatorResult = true;
   Uint8List? mockRenderFirstPageResult;
+  Uint8List? mockExtractPageThumbnailResult;
 
   // Stream controllers for testing
   final StreamController<ReadiumReaderStatus> _readerStatusController =
@@ -314,6 +315,22 @@ class MockFlureadiumPlatform
       }),
     );
     return mockRenderFirstPageResult;
+  }
+
+  @override
+  Future<Uint8List?> extractPageThumbnail(
+    String href,
+    int maxHeight,
+    int quality,
+  ) async {
+    calls.add(
+      MockMethodCall('extractPageThumbnail', {
+        'href': href,
+        'maxHeight': maxHeight,
+        'quality': quality,
+      }),
+    );
+    return mockExtractPageThumbnailResult;
   }
 
   // State Streams

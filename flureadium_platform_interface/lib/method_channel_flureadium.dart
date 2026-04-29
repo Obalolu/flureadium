@@ -151,6 +151,16 @@ class MethodChannelFlureadium extends FlureadiumPlatform {
       false;
 
   @override
+  Future<Uint8List?> extractPageThumbnail(
+    String href,
+    int maxHeight,
+    int quality,
+  ) async => await methodChannel.invokeMethod<Uint8List>(
+    'extractPageThumbnail',
+    [href, maxHeight, quality],
+  );
+
+  @override
   Future<void> setEPUBPreferences(EPUBPreferences preferences) async {
     defaultPreferences = preferences;
     await currentReaderWidget?.setEPUBPreferences(preferences);

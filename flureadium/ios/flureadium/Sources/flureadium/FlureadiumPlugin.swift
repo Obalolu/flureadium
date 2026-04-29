@@ -173,6 +173,38 @@ public class FlureadiumPlugin: NSObject, FlutterPlugin, ReadiumShared.WarningLog
           }
         }
       }
+    case "extractPageThumbnail":
+      guard let args = call.arguments as? [Any?],
+            args.count >= 3,
+            let href = args[0] as? String,
+            let maxHeight = args[1] as? Int,
+            let quality = args[2] as? Int else {
+        return result(FlutterError.init(
+          code: "InvalidArgument",
+          message: "extractPageThumbnail requires [href: String, maxHeight: Int, quality: Int]",
+          details: nil))
+      }
+      guard let publication = currentPublication,
+            let url = AnyURL(legacyHREF: href) else {
+        return result(nil)
+      }
+      Task.detached(priority: .userInitiated) {
+        let resource = publication.get(url)
+        guard let data = try? await resource?.read().get() else {
+          await MainActor.run { result(nil) }
+          return
+        }
+        let jpeg = PageThumbnailExtractor.extract(
+          data: data, maxHeight: maxHeight, quality: quality
+        )
+        await MainActor.run {
+          if let jpeg = jpeg {
+            result(FlutterStandardTypedData(bytes: jpeg))
+          } else {
+            result(nil)
+          }
+        }
+      }
 
     case "ttsEnable":
       guard let args = call.arguments as? [Any?] else {
@@ -380,8 +412,7 @@ public class FlureadiumPlugin: NSObject, FlutterPlugin, ReadiumShared.WarningLog
         }
         // ImageReaderView goTo (CBZ / DiViNa)
         else if (currentImageReaderView != nil) {
-          await currentImageReaderView?.goToLocator(locator: locator, animated: false)
-          navigated = true
+          navigated = await currentImageReaderView?.goToLocator(locator: locator, animated: false) ?? false
         }
         // PdfReaderView goTo
         else if (currentPdfReaderView != nil) {

@@ -1,4 +1,9 @@
-## 0.6.1
+## 0.7.0
+
+### New Features
+
+- Add `extractPageThumbnail(href, maxHeight, quality)` to `FlureadiumPlatform` and `MethodChannelFlureadium`.
+- The method-channel implementation sends `extractPageThumbnail` with `[href, maxHeight, quality]` and returns nullable `Uint8List` JPEG bytes.
 
 ### Bug Fixes
 
@@ -6,6 +11,7 @@
 
 ### Testing
 
+- Add method-channel integration tests for thumbnail argument forwarding, nullable byte results, and native exception propagation.
 - Add 8 unit tests for href encoding: fromJson decoding, toJson encoding, roundtrip idempotency, and edge cases (spaces-only, brackets-only, mixed special characters).
 
 ---

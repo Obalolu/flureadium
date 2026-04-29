@@ -374,6 +374,57 @@ void main() {
       });
     });
 
+    group('Extract Page Thumbnail', () {
+      test(
+        'extractPageThumbnail forwards args and returns platform bytes',
+        () async {
+          mockPlatform.mockExtractPageThumbnailResult = Uint8List.fromList([
+            0xFF,
+            0xD8,
+            0xAA,
+          ]);
+
+          final result = await flureadium.extractPageThumbnail(
+            'OEBPS/page-3.jpg',
+            80,
+            70,
+          );
+
+          expect(mockPlatform.wasCalled('extractPageThumbnail'), isTrue);
+          expect(
+            mockPlatform.lastCallArgs('extractPageThumbnail')?['href'],
+            equals('OEBPS/page-3.jpg'),
+          );
+          expect(
+            mockPlatform.lastCallArgs('extractPageThumbnail')?['maxHeight'],
+            equals(80),
+          );
+          expect(
+            mockPlatform.lastCallArgs('extractPageThumbnail')?['quality'],
+            equals(70),
+          );
+          expect(result, isNotNull);
+          expect(result!.length, equals(3));
+          expect(result[0], equals(0xFF));
+        },
+      );
+
+      test(
+        'extractPageThumbnail returns null when platform returns null',
+        () async {
+          mockPlatform.mockExtractPageThumbnailResult = null;
+
+          final result = await flureadium.extractPageThumbnail(
+            'OEBPS/missing.jpg',
+            80,
+            70,
+          );
+
+          expect(result, isNull);
+        },
+      );
+    });
+
     group('Render First Page', () {
       test(
         'renderFirstPage calls platform method with correct arguments',

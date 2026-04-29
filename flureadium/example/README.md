@@ -13,6 +13,8 @@ integration_test/
 ├── epub_tts_test.dart      # TTS enable/disable, voice cycling, position restore
 ├── epub_tts_web_test.dart  # Web Speech API TTS tests
 ├── audiobook_test.dart     # Open audiobook, play/pause (native only)
+├── cbz_test.dart           # Open CBZ, navigate, goToLocator, extract thumbnails
+├── divina_test.dart        # Open DIVINA and navigate image-based pages
 └── webpub_test.dart        # Open remote WebPub manifest
 test/
 └── widget_test.dart    # Widget smoke test
@@ -70,6 +72,23 @@ await flureadium.goToLocator(savedLocator);
 
 // Jump to TOC entry
 await flureadium.goByLink(tocLink, publication);
+```
+
+### Image-Based Publications
+
+```dart
+// Open a bundled CBZ or DIVINA file
+final comic = await flureadium.openPublication('file:///path/to/comic.cbz');
+
+// Same widget and navigation API as EPUB/PDF
+ReadiumReaderWidget(publication: comic);
+await flureadium.goRight();
+await flureadium.goToLocator(
+  const Locator(href: '003.jpg', type: 'image/jpeg'),
+);
+
+// Build page preview UI from an image resource in the open publication
+final thumbnail = await flureadium.extractPageThumbnail('001.jpg', 80, 70);
 ```
 
 ### Text-to-Speech
@@ -176,6 +195,8 @@ if (savedJson != null) {
 | Button | API method | Notes |
 |---|---|---|
 | Open EPUB | `openPublication` | Extracts bundled asset to temp; auto-opens on launch |
+| Open CBZ | `openPublication` | Bundled `.cbz` image-based comic |
+| Open DIVINA | `openPublication` | Bundled `.divina` visual narrative |
 | Open AudioBook | `openPublication` | Bundled `.audiobook` file |
 | Open WebPub | `openPublication` + `setCustomHeaders` | Remote manifest; sets `X-Example` header first |
 | Load Only | `loadPublication` | Loads metadata without showing in reader; prints title to debug |
@@ -209,6 +230,7 @@ The following public API methods are not given dedicated buttons because they ar
 | `setDefaultPreferences` | App-level config set before opening; not interactive |
 | `setDefaultPdfPreferences` | PDF-specific; no PDF asset bundled |
 | `renderFirstPage` | PDF-specific; no PDF asset bundled |
+| `extractPageThumbnail` | Covered by CBZ integration tests; no dedicated UI control |
 
 ## Platform-Specific Setup
 

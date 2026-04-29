@@ -319,6 +319,20 @@ class Flureadium {
     );
   }
 
+  /// Extracts a downscaled JPEG thumbnail of a publication resource.
+  ///
+  /// [href] is the resource href as it appears in [Publication.readingOrder]
+  /// or [Publication.tableOfContents]. [maxHeight] caps the longest side of
+  /// the output image in pixels. [quality] is the JPEG quality (0-100).
+  ///
+  /// Returns null if the publication is closed, the href cannot be resolved,
+  /// or the resource cannot be decoded. Web always returns null.
+  Future<Uint8List?> extractPageThumbnail(
+    String href,
+    int maxHeight,
+    int quality,
+  ) => _platform.extractPageThumbnail(href, maxHeight, quality);
+
   /// Navigates to a link within the publication.
   ///
   /// Converts the [link] to a [Locator] and navigates to it.

@@ -18,6 +18,8 @@ import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.util.Try
+import org.readium.r2.shared.util.Url
+import org.readium.r2.shared.util.fromLegacyHref
 import org.readium.r2.shared.util.getOrElse
 import kotlin.time.Duration
 
@@ -203,9 +205,9 @@ internal class PublicationMethodCallHandler() :
                     throw Exception("goToLocator: failed to go to locator. Missing locator: ${args[0]} ")
                 }
 
-                ReadiumReader.goToLocator(locator)
+                val navigated = ReadiumReader.goToLocator(locator)
 
-                return Try.success(null)
+                return Try.success(navigated)
             }
 
             "getLinkContent" -> {
@@ -259,6 +261,14 @@ internal class PublicationMethodCallHandler() :
                 val maxWidth = args[1] as Int
                 val maxHeight = args[2] as Int
                 return renderFirstPage(pubUrlStr, maxWidth, maxHeight)
+            }
+
+            "extractPageThumbnail" -> {
+                val args = arguments as List<Any?>
+                val href = args[0] as String
+                val maxHeight = args[1] as Int
+                val quality = args[2] as Int
+                return extractPageThumbnail(href, maxHeight, quality)
             }
 
             else -> {
@@ -438,6 +448,26 @@ internal class PublicationMethodCallHandler() :
 
         ReadiumReader.audioEnable(locator, preferences)
         return Try.success(null)
+    }
+
+    /**
+     * Extract a downscaled JPEG thumbnail from the resource at [href] in the open publication.
+     * Returns null if no publication is open, the resource is missing/unreadable, or decode fails.
+     */
+    private suspend fun extractPageThumbnail(
+        href: String,
+        maxHeight: Int,
+        quality: Int,
+    ): Try<ByteArray?, PublicationError> {
+        val publication = ReadiumReader.currentPublication
+            ?: return Try.success(null)
+        // Use fromLegacyHref to match iOS AnyURL(legacyHREF:) — strips a
+        // leading '/' the Dart Publication.fromJson normalizer adds and
+        // percent-encodes the path before container lookup.
+        val url = Url.fromLegacyHref(href) ?: return Try.success(null)
+        val resource = publication.get(url) ?: return Try.success(null)
+        val resourceBytes = resource.read().getOrElse { return Try.success(null) }
+        return Try.success(PageThumbnailExtractor.extract(resourceBytes, maxHeight, quality))
     }
 
     /**

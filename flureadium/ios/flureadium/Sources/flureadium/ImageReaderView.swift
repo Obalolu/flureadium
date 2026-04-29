@@ -8,6 +8,8 @@ private let ImageReaderStatusReady = "ready"
 private let ImageReaderStatusLoading = "loading"
 private let ImageReaderStatusClosed = "closed"
 private let ImageReaderStatusError = "error"
+private let ImageReaderNavigationReadyTimeoutNanoseconds: UInt64 = 10_000_000_000
+private let ImageReaderNavigationReadyPollNanoseconds: UInt64 = 50_000_000
 
 class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, VisualNavigatorDelegate {
   private let channel: ReadiumReaderChannel
@@ -119,8 +121,41 @@ class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, Visu
     imageViewController.currentLocation
   }
 
-  func goToLocator(locator: Locator, animated: Bool) async {
-    let _ = await imageViewController.go(to: locator, options: NavigatorGoOptions(animated: animated))
+  @MainActor
+  func goToLocator(locator: Locator, animated: Bool) async -> Bool {
+    guard await waitUntilReadyForProgrammaticNavigation() else {
+      print(TAG, "goToLocator: reader not ready for \(locator.href)")
+      return false
+    }
+
+    return await imageViewController.go(to: locator, options: NavigatorGoOptions(animated: animated))
+  }
+
+  @MainActor
+  private func waitUntilReadyForProgrammaticNavigation() async -> Bool {
+    if isReadyForProgrammaticNavigation {
+      return true
+    }
+
+    let deadline = DispatchTime.now().uptimeNanoseconds + ImageReaderNavigationReadyTimeoutNanoseconds
+    while DispatchTime.now().uptimeNanoseconds < deadline {
+      if Task.isCancelled {
+        return false
+      }
+
+      try? await Task.sleep(nanoseconds: ImageReaderNavigationReadyPollNanoseconds)
+
+      if isReadyForProgrammaticNavigation {
+        return true
+      }
+    }
+
+    return isReadyForProgrammaticNavigation
+  }
+
+  @MainActor
+  private var isReadyForProgrammaticNavigation: Bool {
+    hasSentReady || imageViewController.currentLocation != nil
   }
 
   private func configureEdgeTapHandlers() {
@@ -199,8 +234,8 @@ class ImageReaderView: NSObject, FlutterPlatformView, CBZNavigatorDelegate, Visu
       let animated = args[1] as! Bool
 
       Task { @MainActor in
-        await self.goToLocator(locator: locator, animated: animated)
-        result(true)
+        let success = await self.goToLocator(locator: locator, animated: animated)
+        result(success)
       }
     case "goLeft":
       let animated = call.arguments as! Bool

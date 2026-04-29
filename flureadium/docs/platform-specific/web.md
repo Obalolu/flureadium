@@ -120,6 +120,7 @@ For advanced CSS options, see [Readium CSS Types](https://github.com/readium/ts-
 | WebPub from remote URL | Broken | `loadPublication` / `getPublication` call fails before `ReadiumWebView` container is mounted |
 | TTS | Supported | Uses Web Speech API — see Text-to-Speech section below |
 | Audiobook playback | Not implemented | Throws `UnimplementedError` |
+| Page thumbnails | Not implemented | `extractPageThumbnail` returns `null` |
 | Custom HTTP headers | No-op | `setCustomHeaders` logs a warning and does nothing on web |
 | Background Audio | No | Browser limitation |
 | Lock Screen | No | Browser limitation |

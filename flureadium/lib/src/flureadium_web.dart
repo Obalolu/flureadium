@@ -210,6 +210,13 @@ class FlureadiumWebPlugin extends FlureadiumPlatform {
       );
     }
   }
+
+  @override
+  Future<Uint8List?> extractPageThumbnail(
+    String href,
+    int maxHeight,
+    int quality,
+  ) async => null;
   // COMMON PLAYBACK API - END
 
   // TTS API - BEGIN

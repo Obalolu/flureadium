@@ -1047,14 +1047,23 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
     }
 
     /**
-     * Go to a specific locator.
+     * Go to a specific locator. Returns true if at least one navigator was
+     * available to dispatch to, false otherwise.
      */
-    suspend fun goToLocator(locator: Locator) {
+    suspend fun goToLocator(locator: Locator): Boolean {
+        val handled = audiobookNavigator != null
+            || syncAudiobookNavigator != null
+            || ttsNavigator != null
+            || imageNavigator != null
+            || pdfNavigator != null
+            || epubNavigator != null
         audiobookNavigator?.goToLocator(locator)
         syncAudiobookNavigator?.goToLocator(locator)
         ttsNavigator?.goToLocator(locator)
         imageGoToLocator(locator, true)
+        pdfGoToLocator(locator, true)
         epubGoToLocator(locator, true)
+        return handled
     }
 
     suspend fun audioSeek(offsetSeconds: Double) {

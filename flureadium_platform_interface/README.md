@@ -10,6 +10,12 @@ To implement a new platform-specific implementation of `flureadium`, extend [`Fl
 
 This package is endorsed and used by the `flureadium` package. It should not be used directly by app developers.
 
+## Current platform contract
+
+Platform implementations are expected to provide publication lifecycle, visual navigation, playback, preference, decoration, and resource helper APIs. Recent resource helpers include `renderFirstPage()` for PDF cover generation and `extractPageThumbnail()` for downscaled JPEG thumbnails from image resources in the currently open publication.
+
+`extractPageThumbnail()` should return `null` when a platform cannot resolve or decode the resource. Platforms that do not support thumbnail extraction may keep the default `UnimplementedError` until they add support.
+
 ## Note on breaking changes
 
 Strongly prefer non-breaking changes (such as adding a method to the interface) over breaking changes for this package.

@@ -75,11 +75,12 @@ For audiobook background playback, add to `Info.plist`:
 ```
 ios/Sources/flureadium/
 ├── FlureadiumPlugin.swift       # Plugin registration
-├── MethodCallHandler.swift      # Method channel handler
-├── ReadiumManager.swift         # Readium lifecycle
 ├── ReadiumReaderViewFactory.swift # Platform view factory
-├── ReadiumReaderView.swift      # Native reader view
-└── NavigatorController.swift    # Navigation handling
+├── ReadiumReaderView.swift      # EPUB reader view
+├── PdfReaderView.swift          # PDF reader view
+├── ImageReaderView.swift        # CBZ / DIVINA reader view
+├── EdgeTapInterceptView.swift   # Edge tap and swipe overlay
+└── PageThumbnailExtractor.swift # Downscaled JPEG thumbnails for image resources
 ```
 
 ### Platform View
@@ -174,6 +175,8 @@ This is a native iOS layer change only. No Dart or Flutter changes are required.
 - `PdfReaderView.swift` - PDF reader using EdgeTapInterceptView
 - `ImageReaderView.swift` - CBZ / DIVINA reader using EdgeTapInterceptView
 
+Programmatic `goToLocator` calls route to the active EPUB, PDF, image, or time-based navigator. For CBZ/DIVINA, `ImageReaderView` waits briefly for the Readium image navigator to report readiness before calling `go(to:)`; it returns `false` instead of hanging indefinitely if readiness never arrives.
+
 ### CBZ Image Caching
 
 Readium's CBZ navigator creates a new `ImageViewController` for every page turn, each fetching the full image from a local HTTP server via `URLSession.shared`. The server's `ResourceResponse` sets `Cache-Control: no-cache, no-store, must-revalidate` to protect DRM-enabled content, which prevents `URLCache` from storing responses. For CBZ and DiViNa publications (which have no DRM), this causes redundant ZIP extraction and HTTP round-trips on every swipe.
@@ -204,6 +207,21 @@ Fast swiping is handled by cancelling the in-flight prefetch task on each new pa
 **Files:**
 - `ImageCacheURLProtocol.swift` — URLProtocol subclass with primary NSCache + secondary prefetch store
 - `ImageReaderView.swift` — enable/disable calls in init and dispose, prefetch logic in `locationDidChange`
+
+### Page Thumbnails
+
+`extractPageThumbnail(href, maxHeight, quality)` reads an image resource from the currently open publication and returns a downscaled JPEG. This is primarily useful for CBZ/DIVINA page previews and TOC thumbnail UI.
+
+The iOS implementation:
+- Resolves the incoming href with `AnyURL(legacyHREF:)`, matching Readium's manifest href handling.
+- Reads the resource from the active `Publication`, so the same mounted publication and Readium access path are reused.
+- Uses ImageIO's thumbnail creation path (`CGImageSourceCreateThumbnailAtIndex`) with `kCGImageSourceThumbnailMaxPixelSize`, avoiding a full-size bitmap decode.
+- Compresses to JPEG with the requested 0-100 quality value.
+- Returns `nil` when no publication is open, the href cannot be resolved, `maxHeight <= 0`, or ImageIO cannot decode the resource.
+
+**Files:**
+- `PageThumbnailExtractor.swift` — ImageIO thumbnail decode and JPEG encode helper
+- `FlureadiumPlugin.swift` — `extractPageThumbnail` method-channel handler
 
 ### Text Selection Copy
 

@@ -93,6 +93,7 @@ android/src/main/kotlin/dev/mulev/flureadium/
 ├── ReadiumReaderViewFactory.kt  # Platform view factory
 ├── ReadiumReaderView.kt         # Native reader view (EPUB)
 ├── ReadiumReaderWidget.kt       # Widget wrapper
+├── PageThumbnailExtractor.kt    # Downscaled JPEG thumbnails for image resources
 ├── FlutterPdfPreferences.kt     # PDF preferences mapping
 ├── fragments/
 │   └── PdfReaderFragment.kt     # PDF reader fragment
@@ -169,6 +170,20 @@ await flureadium.setPDFPreferences(PDFPreferences(
 - `PdfNavigator.kt` - Main PDF navigation controller
 - `PdfReaderFragment.kt` - Android Fragment hosting the PDF view
 - `FlutterPdfPreferences.kt` - Maps Flutter preferences to Readium
+
+### Page Thumbnails
+
+`extractPageThumbnail(href, maxHeight, quality)` resolves `href` against the currently open publication and returns a downscaled JPEG for image resources. It is intended for CBZ/DIVINA page previews, TOC thumbnails, and similar UI.
+
+The Android implementation:
+- Normalizes the incoming href with Readium's legacy-href URL conversion, matching the iOS `AnyURL(legacyHREF:)` path.
+- Reads the resource from the active `Publication`, so mounted publications, streaming resources, and protected resources use the same Readium access path as the reader.
+- Uses `BitmapFactory` with a bounds pass plus `inSampleSize`, then scales to the requested maximum pixel size and compresses to JPEG.
+- Returns `null` when no publication is open, the href is missing, `maxHeight <= 0`, or the image cannot be decoded.
+
+**Files:**
+- `PageThumbnailExtractor.kt` - Decode/downscale/compress helper
+- `PublicationChannel.kt` - `extractPageThumbnail` method-channel handler
 
 ## Edge Tap and Swipe Navigation
 
@@ -268,7 +283,7 @@ android {
 1. Check TTS engine is installed (Settings > Accessibility > TTS)
 2. Download language data if prompted
 3. Test with system TTS settings
-4. If TTS stops when the app goes to the background, update to the latest Flureadium release. Recent Android fixes cover both the media-service startup path (`startForegroundService()` instead of `startService()`) and an activity saved-state crash caused by serializing Readium decoration styles when the app was backgrounded.
+4. If TTS stops when the app goes to the background, update to the latest Flureadium release. Recent Android fixes cover the media-service startup path by entering the foreground immediately with a startup media notification, and also cover an activity saved-state crash caused by serializing Readium decoration styles when the app was backgrounded.
 
 ### Edge taps not responding
 

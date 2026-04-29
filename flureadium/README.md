@@ -9,10 +9,12 @@ A comprehensive Flutter plugin for reading EPUB ebooks, audiobooks, and comics u
 
 - **EPUB Reading**: Full EPUB 2/3 support with customizable typography
 - **PDF Reading**: PDF support via Readium's PDF adapters (Android via Pdfium, iOS via PDFKit)
+- **CBZ and DIVINA Reading**: Image-based comics and visual narratives on Android and iOS
 - **Audiobook Playback**: Native audio with background playback support
 - **Text-to-Speech**: Platform TTS with voice selection, rate control, availability detection, and position restore
 - **Synchronized Audio**: Media overlay support for read-along experiences
 - **Highlighting**: Decoration API for bookmarks, highlights, and annotations
+- **Page Thumbnails**: Downscaled JPEG thumbnails for image resources in the open publication
 - **Cross-Platform**: Android, iOS, macOS, and Web (web support is work in progress — see [Web Platform](docs/platform-specific/web.md))
 
 ## Quick Start
@@ -21,7 +23,7 @@ A comprehensive Flutter plugin for reading EPUB ebooks, audiobooks, and comics u
 
 ```yaml
 dependencies:
-  flureadium: ^0.9.3
+  flureadium: ^0.11.0
 ```
 
 ### Platform Setup
@@ -113,15 +115,19 @@ final flureadium = Flureadium();
 final publication = await flureadium.openPublication('file:///path/to/book.epub');
 
 // Display in your widget tree
-ReaderWidget(
-  onReaderCreated: (controller) {
-    // Reader is ready
+ReadiumReaderWidget(
+  publication: publication,
+  onReady: () {
+    // Native reader is ready
   },
 )
 
 // Navigate
 await flureadium.goRight();
 await flureadium.goToLocator(savedPosition);
+
+// Extract a small thumbnail for an image resource in an open CBZ/DIVINA
+final bytes = await flureadium.extractPageThumbnail('001.jpg', 80, 70);
 
 // Listen for position changes
 flureadium.onTextLocatorChanged.listen((locator) {

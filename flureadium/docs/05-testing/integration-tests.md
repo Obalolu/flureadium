@@ -12,7 +12,7 @@ Integration tests run the example app on a real device or simulator and assert w
 | `launch_test.dart` | All | App starts, MaterialApp renders |
 | `epub_test.dart` | Android, iOS | EPUB auto-opens, navigation/prefs/highlight don't crash, TTS sentence nav buttons appear, close removes widget |
 | `audiobook_test.dart` | Android, iOS (`@Tags(['native'])`) | Audiobook opens, play changes button label, seek doesn't crash, pause/resume button labels cycle correctly |
-| `cbz_test.dart` | Android, iOS | CBZ auto-opens, `ReadiumReaderWidget` present, left/right navigation works |
+| `cbz_test.dart` | Android, iOS | CBZ auto-opens, navigation works, `goToLocator` reaches an image page, `extractPageThumbnail` returns JPEG bytes/null as appropriate |
 | `divina_test.dart` | Android, iOS | DIVINA auto-opens, `ReadiumReaderWidget` present, left/right navigation works |
 | `webpub_test.dart` | Android, iOS | Remote WebPub manifest opens, `ReadiumReaderWidget` present |
 

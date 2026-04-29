@@ -249,7 +249,12 @@ ReadiumReaderWidget(publication: comic);
 await flureadium.goLeft();
 await flureadium.goRight();
 await flureadium.goToLocator(locator);
+
+// Build a thumbnail strip from image resources in the open publication
+final thumbBytes = await flureadium.extractPageThumbnail('001.jpg', 80, 70);
 ```
+
+`extractPageThumbnail` returns downscaled JPEG bytes on Android and iOS, or `null` when the publication is closed, the href cannot be resolved, the resource is not an image, or the current platform does not implement thumbnail extraction.
 
 ## Decorations
 

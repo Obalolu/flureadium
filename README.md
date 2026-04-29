@@ -11,12 +11,14 @@ This project is a fork of [Notalib/flutter_readium](https://github.com/Notalib/f
 - **EPUB 2 & 3 reading** — paginated and scrolling modes with customizable typography
 - **WebPub support** — web publication format alongside EPUB
 - **PDF support** — native rendering on Android (Pdfium) and iOS
+- **CBZ and DIVINA support** — native image-based publication rendering on Android and iOS
 - **Text-to-Speech** — platform-native TTS with voice selection, speed, and pitch control
 - **Audiobook playback** — pre-recorded audio with track navigation, seeking, and variable speed
 - **Media Overlays** — synchronized audio with text highlighting (read-along)
 - **Highlights and annotations** — visual decorations with custom colors and styles
 - **Reader preferences** — fonts, font sizes, colors, margins, themes (night/sepia), scroll modes
 - **Progress saving** — position persistence and restoration via Locators
+- **Page thumbnails** — downscaled JPEG thumbnails for image resources in open publications
 - **Table of contents** — hierarchical navigation through publication structure
 - **Real-time event streams** — position changes, playback state, reader status, and errors
 
@@ -28,6 +30,8 @@ This project is a fork of [Notalib/flutter_readium](https://github.com/Notalib/f
 | EPUB 3 | Yes | Yes | Yes | Yes |
 | WebPub | Yes | Yes | Yes | Yes |
 | PDF | Android, iOS | — | — | — |
+| CBZ | Android, iOS | — | — | — |
+| DIVINA | Android, iOS | — | — | — |
 
 ## Minimum Requirements
 
@@ -45,7 +49,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flureadium: ^x.y.z
+  flureadium: ^0.11.0
 ```
 
 Then follow the platform-specific setup below. For full details, see the [Installation Guide](flureadium/docs/getting-started/installation.md).
@@ -54,10 +58,12 @@ Then follow the platform-specific setup below. For full details, see the [Instal
 
 - Set `minSdkVersion` to 24 or higher in `android/app/build.gradle`.
 - Change your main activity to extend `FlutterFragmentActivity` instead of `FlutterActivity`.
-- If using TTS, add to your `AndroidManifest.xml`:
+- If using TTS or audiobook background playback, add to your `AndroidManifest.xml`:
 
 ```xml
 <uses-permission android:name="android.permission.WAKE_LOCK" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 ```
 
 ### iOS
@@ -137,6 +143,8 @@ What Flureadium supports on each platform:
 |---------|---------|-----|-------|-----|
 | EPUB Visual Reading | Yes | Yes | Yes | Yes |
 | PDF | Yes | Yes | Yes | No |
+| CBZ / DIVINA | Yes | Yes | No | No |
+| Page Thumbnails | Yes | Yes | No | No |
 | Text-to-Speech | Yes | Yes | Yes | Limited&sup1; |
 | Audiobook Playback | Yes | Yes | Yes | Partial&sup2; |
 | Media Overlays | Yes | Yes | Yes | No |
@@ -177,8 +185,6 @@ Native Readium features that exist in the underlying toolkits but are not yet su
 | LCP DRM | Kotlin, Swift | Not integrated (infrastructure exists, can be enabled) |
 | OPDS Catalog Browsing | Kotlin, Swift | Not exposed in API |
 | Content Search | Kotlin, Swift | Not exposed in API |
-| CBZ Comics | Kotlin, Swift | Not implemented |
-| Divina (Visual Narratives) | Kotlin, Swift | Not implemented |
 
 ## Architecture
 

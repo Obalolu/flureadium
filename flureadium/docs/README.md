@@ -42,8 +42,6 @@ Flureadium is a Flutter plugin that wraps the Readium toolkits for reading EPUB 
 ## Architecture
 
 - **[Overview](architecture/overview.md)** - High-level architecture
-- **[Platform Channels](architecture/platform-channels.md)** - Native communication
-- **[Readium Integration](architecture/readium-integration.md)** - How we wrap Readium
 
 ## Platform Setup
 
@@ -60,10 +58,10 @@ Flureadium is a Flutter plugin that wraps the Readium toolkits for reading EPUB 
 | EPUB 3 | Yes | Yes | Yes | Yes |
 | WebPub | Yes | Yes | Yes | Yes |
 | PDF | Android, iOS | - | - | - |
+| CBZ | Android, iOS | - | - | - |
+| DIVINA | Android, iOS | - | - | - |
 
-> **Note:** PDF support status:
-> - **Completed:** Format detection, preferences API, Android native navigator, iOS native navigator, Flutter widget layer integration, Epist migration
-> - **In Progress:** Manual testing on both platforms
+PDF, CBZ, and DIVINA are native-reader features on Android and iOS. Web support is work in progress and currently focuses on EPUB/WebPub infrastructure and Web Speech API TTS.
 
 ## Minimum Requirements
 
@@ -81,4 +79,4 @@ Flureadium is a Flutter plugin that wraps the Readium toolkits for reading EPUB 
 
 ---
 
-*Last updated: 2026-02-08*
+*Last updated: 2026-04-29*

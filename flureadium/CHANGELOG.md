@@ -1,3 +1,36 @@
+## 0.11.0
+
+### New Features
+
+- Add `Flureadium.extractPageThumbnail(href, maxHeight, quality)` for downscaled JPEG thumbnails from image resources in the currently open publication.
+- Add native thumbnail extraction on Android and iOS. Android uses `BitmapFactory` downsampling and JPEG compression; iOS uses ImageIO thumbnail decoding and JPEG compression.
+- Add the `extractPageThumbnail` web override, returning `null` until a web decoder is wired up.
+
+### Bug Fixes
+
+- **iOS / CBZ and PDF navigation**: Route `goToLocator` to image-based readers and PDF readers, not just EPUB and time-based navigators.
+- **iOS / early CBZ navigation**: Wait for the image navigator to become ready before programmatic `goToLocator`, returning `false` instead of hanging indefinitely when readiness never arrives.
+- **Android / CBZ and PDF navigation**: Dispatch `goToLocator` to image and PDF navigators and return the native navigation result to Dart.
+- **Android / thumbnail href lookup**: Resolve thumbnail hrefs through Readium legacy-href URL normalization so manifest hrefs with leading slashes or encoded characters resolve consistently.
+- **Android / TTS service startup**: Enter the foreground immediately with a startup media notification so background playback startup is not killed before the real media notification is ready.
+
+### Testing
+
+- Add Dart facade tests and platform-interface method-channel tests for `extractPageThumbnail`.
+- Add Android JVM tests for `PageThumbnailExtractor` and foreground-service startup behavior.
+- Add iOS XCTest coverage for `PageThumbnailExtractor` and image-reader `goToLocator` readiness/routing.
+- Extend CBZ integration coverage for `goToLocator`, successful thumbnail extraction, missing hrefs, and closed-publication behavior.
+
+### Documentation
+
+- Document `extractPageThumbnail` in the Flureadium API reference, concepts, platform docs, READMEs, and example README.
+- Update README and docs format matrices for CBZ/DIVINA support and remove stale "not implemented" claims.
+- Document Android and iOS thumbnail implementation details and the web `null` behavior.
+
+### Dependencies
+
+- Requires `flureadium_platform_interface` ^0.7.0.
+
 ## 0.10.0
 
 ### New Features

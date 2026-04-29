@@ -80,6 +80,7 @@ lib/
 The main API entry point. Provides:
 - Publication lifecycle (open, close)
 - Navigation (goLeft, goRight, goToLocator)
+- Page and cover thumbnails
 - Playback (TTS, audiobook)
 - Preferences and decorations
 
@@ -129,6 +130,7 @@ abstract class FlureadiumPlatform extends PlatformInterface {
   Future<void> goLeft();
   Future<void> goRight();
   Future<bool> goToLocator(Locator locator);
+  Future<Uint8List?> extractPageThumbnail(String href, int maxHeight, int quality);
   // ... more methods
 }
 ```
@@ -146,8 +148,12 @@ Default implementation using Flutter platform channels:
 ```
 android/src/main/kotlin/dev/mulev/flureadium/
 ├── FlureadiumPlugin.kt        # Flutter plugin registration
-├── ReadiumReaderView.kt       # Native reader view
-├── NavigatorWrapper.kt        # Readium navigator wrapper
+├── ReadiumReaderWidget.kt     # Native reader platform view
+├── ReadiumReader.kt           # Reader and navigator orchestration
+├── PublicationChannel.kt      # Main method-channel handler
+├── PageThumbnailExtractor.kt  # Image-resource thumbnail extraction
+├── fragments/                 # EPUB/PDF/image reader fragments
+├── navigators/                # EPUB/PDF/image/audio/TTS navigators
 └── ...
 ```
 
@@ -161,8 +167,10 @@ Uses:
 ```
 ios/Sources/flureadium/
 ├── FlureadiumPlugin.swift     # Flutter plugin registration
-├── ReadiumReaderView.swift    # Native reader view
-├── NavigatorController.swift  # Navigation handling
+├── ReadiumReaderView.swift    # EPUB reader view
+├── PdfReaderView.swift        # PDF reader view
+├── ImageReaderView.swift      # CBZ / DIVINA reader view
+├── PageThumbnailExtractor.swift # Image-resource thumbnail extraction
 └── ...
 ```
 
@@ -275,7 +283,7 @@ Follows Flutter plugin platform interface pattern:
 
 ### Navigator Disposal: `release()` vs `dispose()`
 
-Android navigators (`AudiobookNavigator`, `TTSNavigator`, `EpubNavigator`, `PdfNavigator`) have two disposal methods:
+Android navigators (`AudiobookNavigator`, `TTSNavigator`, `EpubNavigator`, `PdfNavigator`, `ImageNavigator`) have two disposal methods:
 
 - **`dispose()`** — fire-and-forget. Launches cleanup in a detached coroutine and returns immediately. Safe for places where the caller doesn't need to wait for resources to be freed (e.g., widget teardown where the UI is already gone).
 
@@ -309,6 +317,4 @@ All models serialize to/from JSON:
 
 ## See Also
 
-- [Platform Channels](platform-channels.md) - Detailed channel documentation
-- [Readium Integration](readium-integration.md) - How we wrap Readium
 - [Platform-Specific Docs](../platform-specific/) - Platform implementation details

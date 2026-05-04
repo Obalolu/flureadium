@@ -219,6 +219,58 @@ void main() {
     );
   });
 
+  group('flattenToc', () {
+    test('returns empty list for empty input', () {
+      expect(flattenToc([]), isEmpty);
+    });
+
+    test('returns same entries for flat list with no children', () {
+      final toc = [Link(href: '/a.xhtml'), Link(href: '/b.xhtml')];
+      final result = flattenToc(toc);
+      expect(result.map((l) => l.href).toList(), ['/a.xhtml', '/b.xhtml']);
+    });
+
+    test('includes children after parent in depth-first order', () {
+      final toc = [
+        Link(
+          href: '/part.xhtml',
+          children: [
+            Link(href: '/ch1.xhtml'),
+            Link(href: '/ch2.xhtml'),
+          ],
+        ),
+        Link(href: '/end.xhtml'),
+      ];
+      final result = flattenToc(toc);
+      expect(result.map((l) => l.href).toList(), [
+        '/part.xhtml',
+        '/ch1.xhtml',
+        '/ch2.xhtml',
+        '/end.xhtml',
+      ]);
+    });
+
+    test('handles multi-level nesting depth-first', () {
+      final toc = [
+        Link(
+          href: '/top.xhtml',
+          children: [
+            Link(
+              href: '/mid.xhtml',
+              children: [Link(href: '/leaf.xhtml')],
+            ),
+          ],
+        ),
+      ];
+      final result = flattenToc(toc);
+      expect(result.map((l) => l.href).toList(), [
+        '/top.xhtml',
+        '/mid.xhtml',
+        '/leaf.xhtml',
+      ]);
+    });
+  });
+
   group('findTocIndexByPage', () {
     test('finds exact page match', () {
       final toc = [

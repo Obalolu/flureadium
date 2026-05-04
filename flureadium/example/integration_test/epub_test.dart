@@ -1,50 +1,41 @@
 import 'package:flureadium/flureadium.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:flureadium_example/main.dart' as app;
 
-void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+Future<void> _waitForReader(WidgetTester tester) async {
+  for (var i = 0; i < 15; i++) {
+    await tester.pump(const Duration(seconds: 1));
+    if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
+  }
+}
 
-  group('EPUB', () {
+void _navigationTests(String assetLabel, String Function() openButtonLabel) {
+  group('navigation ($assetLabel)', () {
+    setUp(() async {});
+
     tearDown(() async {
-      final flureadium = Flureadium();
-      await flureadium.closePublication();
+      await Flureadium().closePublication();
     });
 
-    testWidgets('app auto-opens EPUB and shows reader widget', (tester) async {
+    testWidgets('opens and shows reader widget', (tester) async {
       app.main();
-      // pumpAndSettle can hang when a PlatformView (WebView) keeps scheduling
-      // frames. Poll for the reader widget with bounded pump loops instead.
-      for (var i = 0; i < 15; i++) {
-        await tester.pump(const Duration(seconds: 1));
-        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
+      await _waitForReader(tester);
+      if (openButtonLabel() != 'default') {
+        await tester.tap(find.text(openButtonLabel()));
+        await _waitForReader(tester);
       }
       expect(find.byType(ReadiumReaderWidget), findsOneWidget);
     });
 
-    testWidgets('long press on reader does not crash', (tester) async {
-      app.main();
-      for (var i = 0; i < 15; i++) {
-        await tester.pump(const Duration(seconds: 1));
-        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
-      }
-
-      final reader = find.byType(ReadiumReaderWidget);
-      expect(reader, findsOneWidget);
-
-      await tester.longPressAt(tester.getCenter(reader));
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(reader, findsOneWidget);
-    });
-
     testWidgets('navigate left and right', (tester) async {
       app.main();
-      for (var i = 0; i < 15; i++) {
-        await tester.pump(const Duration(seconds: 1));
-        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
+      await _waitForReader(tester);
+      if (openButtonLabel() != 'default') {
+        await tester.tap(find.text(openButtonLabel()));
+        await _waitForReader(tester);
       }
       await tester.tap(find.text('←'));
       for (var i = 0; i < 3; i++) {
@@ -57,12 +48,68 @@ void main() {
       expect(find.byType(ReadiumReaderWidget), findsOneWidget);
     });
 
+    testWidgets('DartSkip+ does not crash', (tester) async {
+      app.main();
+      await _waitForReader(tester);
+      if (openButtonLabel() != 'default') {
+        await tester.tap(find.text(openButtonLabel()));
+        await _waitForReader(tester);
+      }
+      await tester.tap(find.text('DartSkip+'));
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+      expect(find.byType(ReadiumReaderWidget), findsOneWidget);
+    });
+
+    testWidgets('DartSkip- does not crash', (tester) async {
+      app.main();
+      await _waitForReader(tester);
+      if (openButtonLabel() != 'default') {
+        await tester.tap(find.text(openButtonLabel()));
+        await _waitForReader(tester);
+      }
+      await tester.tap(find.text('DartSkip-'));
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+      expect(find.byType(ReadiumReaderWidget), findsOneWidget);
+    });
+  });
+}
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  group('EPUB', () {
+    tearDown(() async {
+      await Flureadium().closePublication();
+    });
+
+    testWidgets('app auto-opens EPUB and shows reader widget', (tester) async {
+      app.main();
+      // pumpAndSettle can hang when a PlatformView (WebView) keeps scheduling
+      // frames. Poll for the reader widget with bounded pump loops instead.
+      await _waitForReader(tester);
+      expect(find.byType(ReadiumReaderWidget), findsOneWidget);
+    });
+
+    testWidgets('long press on reader does not crash', (tester) async {
+      app.main();
+      await _waitForReader(tester);
+
+      final reader = find.byType(ReadiumReaderWidget);
+      expect(reader, findsOneWidget);
+
+      await tester.longPressAt(tester.getCenter(reader));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(reader, findsOneWidget);
+    });
+
     testWidgets('Go To Saved does not crash', (tester) async {
       app.main();
-      for (var i = 0; i < 15; i++) {
-        await tester.pump(const Duration(seconds: 1));
-        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
-      }
+      await _waitForReader(tester);
       await tester.tap(find.text('Go To Saved'));
       for (var i = 0; i < 5; i++) {
         await tester.pump(const Duration(seconds: 1));
@@ -72,10 +119,7 @@ void main() {
 
     testWidgets('apply night theme preferences', (tester) async {
       app.main();
-      for (var i = 0; i < 15; i++) {
-        await tester.pump(const Duration(seconds: 1));
-        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
-      }
+      await _waitForReader(tester);
       await tester.tap(find.text('Night'));
       for (var i = 0; i < 3; i++) {
         await tester.pump(const Duration(seconds: 1));
@@ -85,10 +129,7 @@ void main() {
 
     testWidgets('apply decoration to current locator', (tester) async {
       app.main();
-      for (var i = 0; i < 15; i++) {
-        await tester.pump(const Duration(seconds: 1));
-        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
-      }
+      await _waitForReader(tester);
       await tester.tap(find.text('Highlight'));
       for (var i = 0; i < 3; i++) {
         await tester.pump(const Duration(seconds: 1));
@@ -98,10 +139,7 @@ void main() {
 
     testWidgets('close publication removes reader widget', (tester) async {
       app.main();
-      for (var i = 0; i < 15; i++) {
-        await tester.pump(const Duration(seconds: 1));
-        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
-      }
+      await _waitForReader(tester);
       await tester.tap(find.text('Close'));
       // After close, _publication is null and CircularProgressIndicator keeps
       // animating — pumpAndSettle would never settle. Use pump instead.
@@ -111,10 +149,7 @@ void main() {
 
     testWidgets('Load Only does not crash', (tester) async {
       app.main();
-      for (var i = 0; i < 15; i++) {
-        await tester.pump(const Duration(seconds: 1));
-        if (find.byType(ReadiumReaderWidget).evaluate().isNotEmpty) break;
-      }
+      await _waitForReader(tester);
       await tester.tap(find.text('Load Only'));
       for (var i = 0; i < 5; i++) {
         await tester.pump(const Duration(seconds: 1));
@@ -122,4 +157,11 @@ void main() {
       // no crash = pass
     });
   });
+
+  // Navigation smoke tests run with both fixtures to catch regressions.
+  // The hierarchical fixture has Part I → [Ch1, Ch2, Ch3] and
+  // Part II → Section 1 → [Ch4, Ch5], verifying that flattenToc-based skip
+  // navigation works with multi-level TOC structures.
+  _navigationTests('moby_dick', () => 'default');
+  _navigationTests('hierarchical_toc', () => 'Open Hierarchical');
 }

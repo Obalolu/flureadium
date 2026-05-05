@@ -1,3 +1,27 @@
+## 0.12.0
+
+### New Features
+
+- Add `flattenToc(List<Link> toc) → List<Link>`. Collects every TOC entry — including `link.children` at any depth — into a flat list in reading order. Exported from the `flureadium` barrel. Use it when you need a flat chapter sequence for a progress indicator or jump-to-chapter picker.
+
+### Bug Fixes
+
+- **Chapter skip / hierarchical EPUB3 TOC**: Fix `skipToNext` and `skipToPrevious` on `ReadiumReaderWidget` skipping over entire nested chapter groups. For books where `toc.xhtml` stores chapters as children of a parent entry (`link.children`), both methods previously searched only the top-level list — nested chapters were invisible, skip buttons disappeared, and "next chapter" jumped straight to the next top-level entry. Both now use the flattened TOC.
+- **Chapter skip / non-TOC spine items**: Fix `skipToNext` and `skipToPrevious` giving up when the current page has no TOC entry (a cover, interstitial page, or back matter). Both now scan the reading order to find the nearest TOC entry before or after.
+
+### Testing
+
+- Unit tests for `flattenToc`: empty input, flat list, one level of nesting, multiple levels.
+- Between-entries unit tests for `decideSkipToNext` and `decideSkipToPrevious`: a spine item between two TOC entries resolves to the adjacent chapter in each direction.
+- `ReadiumReaderWidget` unit tests confirming `skipToNext` from a nested chapter reaches the next sibling, not the next top-level entry.
+- `hierarchical_toc.epub` — a synthetic EPUB3 fixture with a two-level TOC (Part I → [Ch1, Ch2, Ch3]; Part II → Section 1 → [Ch4, Ch5]) and three non-TOC spine items.
+- Navigation smoke tests parameterized to run against both `moby_dick.epub` and `hierarchical_toc.epub`.
+
+### Documentation
+
+- Document `flattenToc` in the publication API reference and the EPUB reading guide.
+- Update `skipToNext` / `skipToPrevious` in the ReaderWidget reference with hierarchical TOC behavior.
+
 ## 0.11.0
 
 ### New Features

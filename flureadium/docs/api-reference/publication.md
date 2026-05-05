@@ -83,18 +83,28 @@ final images = pub.resources.where(
 
 **Type:** `List<Link>`
 
-Navigation table of contents structure.
+Navigation table of contents. For EPUB3 publications, the hierarchy from `toc.xhtml` is preserved — chapters nested under a part or section come back as `link.children`, not as top-level entries.
 
 ```dart
 for (final link in pub.tableOfContents) {
-  print(link.title);  // "Chapter 1"
+  print(link.title);  // "Part I"
 
-  // Nested chapters
   for (final child in link.children) {
-    print('  ${child.title}');  // "  Section 1.1"
+    print('  ${child.title}');  // "  Chapter 1"
   }
 }
 ```
+
+To get every entry in reading order, use `flattenToc`:
+
+```dart
+import 'package:flureadium/flureadium.dart';
+
+final chapters = flattenToc(pub.tableOfContents);
+// [Part I, Chapter 1, Chapter 2, Part II, Chapter 3, ...]
+```
+
+`skipToNext` and `skipToPrevious` flatten the TOC internally, so skip buttons work at any nesting depth without extra setup.
 
 ### toc
 

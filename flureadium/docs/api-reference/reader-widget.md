@@ -268,6 +268,8 @@ Skip to the next chapter.
 Future<void> skipToNext({bool animated = true})
 ```
 
+Moves to the next TOC entry. For EPUB3 books with a nested `toc.xhtml`, this is the next chapter at any depth — not the next top-level sibling. If the current page has no TOC entry, scans the reading order to find the nearest TOC entry ahead.
+
 ### skipToPrevious
 
 Skip to the previous chapter.
@@ -275,6 +277,8 @@ Skip to the previous chapter.
 ```dart
 Future<void> skipToPrevious({bool animated = true})
 ```
+
+Moves to the previous TOC entry, with the same hierarchical and between-entries behavior as `skipToNext`.
 
 ### getCurrentLocator
 

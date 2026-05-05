@@ -84,9 +84,18 @@ NavigationDecision decideSkipToNext({
       return NavigationDecision.navigate(firstTocLink, 0);
     }
 
-    // Page not in TOC and not before it - can't advance
+    // Page is between TOC entries — find the next TOC entry after current position
+    for (int i = 0; i < toc.length; i++) {
+      final tocLocator = publication.locatorFromLink(toc[i]);
+      if (tocLocator == null) continue;
+      final tocPos = _findInReadingOrder(tocLocator, readingOrder);
+      if (tocPos != -1 && tocPos > currentPos) {
+        return NavigationDecision.navigate(toc[i], i);
+      }
+    }
+
     return const NavigationDecision.abort(
-      'Page not in TOC and not before first chapter',
+      'No TOC entry after current position',
     );
   }
 
@@ -175,9 +184,18 @@ NavigationDecision decideSkipToPrevious({
       return NavigationDecision.navigate(lastTocLink, lastTocIndex);
     }
 
-    // Page not in TOC and not after it - can't go back
+    // Page is between TOC entries — find the last TOC entry before current position
+    for (int i = toc.length - 1; i >= 0; i--) {
+      final tocLocator = publication.locatorFromLink(toc[i]);
+      if (tocLocator == null) continue;
+      final tocPos = _findInReadingOrder(tocLocator, readingOrder);
+      if (tocPos != -1 && tocPos < currentPos) {
+        return NavigationDecision.navigate(toc[i], i);
+      }
+    }
+
     return const NavigationDecision.abort(
-      'Page not in TOC and not after last chapter',
+      'No TOC entry before current position',
     );
   }
 

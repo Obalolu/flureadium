@@ -374,6 +374,20 @@ class _ReaderPageState extends State<ReaderPage> {
     await _flureadium.goByLink(link, pub);
   }
 
+  Future<void> _openHierarchical() async {
+    try {
+      await _openPublicationAsset('assets/pubs/hierarchical_toc.epub');
+    } catch (e) {
+      debugPrint('openHierarchical error: $e');
+    }
+  }
+
+  Future<void> _dartSkipToNext() async =>
+      FlureadiumPlatform.instance.currentReaderWidget?.skipToNext();
+
+  Future<void> _dartSkipToPrevious() async =>
+      FlureadiumPlatform.instance.currentReaderWidget?.skipToPrevious();
+
   Future<void> _loadOnly() async {
     try {
       final path = await _extractAsset('assets/pubs/moby_dick.epub');
@@ -425,11 +439,23 @@ class _ReaderPageState extends State<ReaderPage> {
                           fontSize: 11,
                         ),
                       ),
+                    Text(
+                      key: const Key('locator_href'),
+                      _locator?.href ?? '',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 10,
+                      ),
+                    ),
                     Wrap(
                       children: [
                         TextButton(
                           onPressed: _openEpub,
                           child: const Text('Open EPUB'),
+                        ),
+                        TextButton(
+                          onPressed: _openHierarchical,
+                          child: const Text('Open Hierarchical'),
                         ),
                         TextButton(
                           onPressed: _openAudiobook,
@@ -470,6 +496,14 @@ class _ReaderPageState extends State<ReaderPage> {
                         TextButton(
                           onPressed: _flureadium.skipToNext,
                           child: const Text('Skip Next'),
+                        ),
+                        TextButton(
+                          onPressed: _dartSkipToPrevious,
+                          child: const Text('DartSkip-'),
+                        ),
+                        TextButton(
+                          onPressed: _dartSkipToNext,
+                          child: const Text('DartSkip+'),
                         ),
                         if (pub != null)
                           TextButton(

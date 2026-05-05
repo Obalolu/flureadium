@@ -169,6 +169,23 @@ int? _parsePageFragment(String fragment) {
   return null;
 }
 
+/// Recursively flattens a hierarchical TOC list into a single ordered list.
+///
+/// Readium iOS serializes EPUB3 nav documents hierarchically — chapters
+/// nested inside a parent section appear as `link.children`, not as top-level
+/// entries. Navigation and boundary-state logic must operate on the flat list
+/// to correctly handle these publications.
+List<Link> flattenToc(List<Link> toc) {
+  final result = <Link>[];
+  for (final link in toc) {
+    result.add(link);
+    if (link.children.isNotEmpty) {
+      result.addAll(flattenToc(link.children));
+    }
+  }
+  return result;
+}
+
 /// Estimates current page from progression (0-1 ratio).
 ///
 /// Used as fallback when locator.locations.position is unavailable.

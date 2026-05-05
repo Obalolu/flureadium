@@ -148,6 +148,8 @@ await flureadium.skipToNext();
 await flureadium.skipToPrevious();
 ```
 
+For EPUB3 books with a hierarchical `toc.xhtml` — where chapters are nested under parts or sections — skip navigation moves to the next (or previous) chapter at any depth. It won't skip past a group of nested children to jump to the next top-level entry. Pages absent from the TOC (a cover, an interstitial) also work: the widget scans the reading order to find the nearest TOC entry on either side.
+
 ### Navigate to Table of Contents Entry
 
 ```dart
@@ -157,6 +159,18 @@ final toc = publication.tableOfContents;
 // Navigate to a specific chapter
 final chapter = toc[2];
 await flureadium.goByLink(chapter, publication);
+```
+
+For EPUB3 publications with a hierarchical TOC, `tableOfContents` preserves the nesting. Use `flattenToc` to get every entry in reading order across all nesting levels:
+
+```dart
+import 'package:flureadium/flureadium.dart';
+
+final chapters = flattenToc(publication.tableOfContents);
+// [Part I, Chapter 1, Chapter 2, Part II, Section 1, Chapter 3, ...]
+
+// Navigate to chapter 3 (index 5 in a typical structure)
+await flureadium.goByLink(chapters[5], publication);
 ```
 
 ### Building a Table of Contents
@@ -203,6 +217,26 @@ class TocView extends StatelessWidget {
     );
   }
 }
+```
+
+For a flat chapter picker (useful for a progress slider or "jump to chapter N" feature), use `flattenToc` instead of iterating the raw list:
+
+```dart
+final chapters = flattenToc(publication.tableOfContents);
+
+showModalBottomSheet(
+  context: context,
+  builder: (_) => ListView.builder(
+    itemCount: chapters.length,
+    itemBuilder: (_, i) => ListTile(
+      title: Text(chapters[i].title ?? 'Chapter ${i + 1}'),
+      onTap: () {
+        Navigator.pop(context);
+        flureadium.goByLink(chapters[i], publication);
+      },
+    ),
+  ),
+);
 ```
 
 ## Physical Page Navigation

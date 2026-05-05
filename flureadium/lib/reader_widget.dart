@@ -163,7 +163,7 @@ class _ReadiumReaderWidgetState extends State<ReadiumReaderWidget>
 
   @override
   Future<void> skipToNext({final bool animated = true}) async {
-    final toc = widget.publication.toc;
+    final toc = flattenToc(widget.publication.toc);
     if (toc.isEmpty || _currentLocator == null) {
       R2Log.d('skipToNext: no TOC or no current locator');
       return;
@@ -238,7 +238,7 @@ class _ReadiumReaderWidgetState extends State<ReadiumReaderWidget>
 
   @override
   Future<void> skipToPrevious({final bool animated = true}) async {
-    final toc = widget.publication.toc;
+    final toc = flattenToc(widget.publication.toc);
     if (toc.isEmpty || _currentLocator == null) {
       R2Log.d('skipToPrevious: no TOC or no current locator');
       return;

@@ -229,8 +229,39 @@ void main() {
         );
 
         expect(decision.canNavigate, isFalse);
-        expect(decision.reason, 'Page not in TOC and not before first chapter');
+        expect(decision.reason, 'No TOC entry after current position');
       });
+
+      test(
+        'currentTocIndex=-1: page between two TOC entries navigates to next entry',
+        () {
+          // Reading order: cover(0), ch1(1), interstitial(2), ch2(3)
+          // TOC: [ch1, ch2] — interstitial is not in TOC
+          final readingOrder = [
+            Link(href: '/cover.xhtml', type: 'application/xhtml+xml'),
+            Link(href: '/ch1.xhtml', type: 'application/xhtml+xml'),
+            Link(href: '/interstitial.xhtml', type: 'application/xhtml+xml'),
+            Link(href: '/ch2.xhtml', type: 'application/xhtml+xml'),
+          ];
+          final toc = [Link(href: '/ch1.xhtml'), Link(href: '/ch2.xhtml')];
+          final publication = _createPublication(toc, readingOrder);
+          final locator = Locator(
+            href: '/interstitial.xhtml',
+            type: 'application/xhtml+xml',
+          );
+
+          final decision = decideSkipToNext(
+            currentLocator: locator,
+            toc: toc,
+            readingOrder: readingOrder,
+            currentTocIndex: -1,
+            publication: publication,
+          );
+
+          expect(decision.canNavigate, isTrue);
+          expect(decision.targetLink?.href, '/ch2.xhtml');
+        },
+      );
     });
   });
 
@@ -459,8 +490,37 @@ void main() {
         );
 
         expect(decision.canNavigate, isFalse);
-        expect(decision.reason, 'Page not in TOC and not after last chapter');
+        expect(decision.reason, 'No TOC entry before current position');
       });
+
+      test(
+        'currentTocIndex=-1: page between two TOC entries navigates to previous entry',
+        () {
+          final readingOrder = [
+            Link(href: '/cover.xhtml', type: 'application/xhtml+xml'),
+            Link(href: '/ch1.xhtml', type: 'application/xhtml+xml'),
+            Link(href: '/interstitial.xhtml', type: 'application/xhtml+xml'),
+            Link(href: '/ch2.xhtml', type: 'application/xhtml+xml'),
+          ];
+          final toc = [Link(href: '/ch1.xhtml'), Link(href: '/ch2.xhtml')];
+          final publication = _createPublication(toc, readingOrder);
+          final locator = Locator(
+            href: '/interstitial.xhtml',
+            type: 'application/xhtml+xml',
+          );
+
+          final decision = decideSkipToPrevious(
+            currentLocator: locator,
+            toc: toc,
+            readingOrder: readingOrder,
+            currentTocIndex: -1,
+            publication: publication,
+          );
+
+          expect(decision.canNavigate, isTrue);
+          expect(decision.targetLink?.href, '/ch1.xhtml');
+        },
+      );
     });
   });
 

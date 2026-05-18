@@ -133,3 +133,10 @@ export interface CurrentSelection {
   text: CurrentSelectionText;
   rect: CurrentSelectionRect;
 }
+
+export type ScrollByViewportBoundary = 'start' | 'end' | null;
+
+export interface ScrollByViewportResult {
+  moved: boolean;
+  boundary: ScrollByViewportBoundary;
+}

@@ -401,26 +401,67 @@ class EpubNavigator : BaseNavigator, EpubReaderFragment.Listener {
         epubNavigator?.setScrollMode(isScrollMode)
     }
 
-    fun goLeft(animated: Boolean) {
+    fun goLeft(animated: Boolean): Boolean {
         val navigator = epubNavigator
         if (navigator == null) {
             Log.e(TAG, "::goLeft - epubNavigator is null!")
-            return
+            return false
         }
 
         Log.d(TAG, "::goLeft")
-        navigator.goLeft(animated)
+        return navigator.goLeft(animated)
     }
 
-    fun goRight(animated: Boolean) {
+    fun goRight(animated: Boolean): Boolean {
         val navigator = epubNavigator
         if (navigator == null) {
             Log.e(TAG, "::goRight - epubNavigator is null!")
-            return
+            return false
         }
 
         Log.d(TAG, "::goRight")
-        navigator.goRight(animated)
+        return navigator.goRight(animated)
+    }
+
+    suspend fun scrollByViewport(
+        direction: String,
+        viewportFraction: Double,
+        animated: Boolean
+    ): Boolean {
+        if (!isVerticalScroll) {
+            return if (direction == "previous") goLeft(animated) else goRight(animated)
+        }
+
+        val json = evaluateJavascript(
+            "window.epubPage.scrollByViewport(\"$direction\", $viewportFraction);"
+        )
+        if (json == null || json == "null" || json == "undefined") {
+            Log.e(TAG, "::scrollByViewport - invalid JS response: $json")
+            return false
+        }
+
+        return try {
+            val result = jsonDecode(json) as JSONObject
+            val moved = result.optBoolean("moved", false)
+            val boundary = result.optString("boundary", "")
+
+            if (moved) {
+                firstVisibleElementLocator()?.let { locator ->
+                    onCurrentLocatorChanges(locator)
+                    state[currentVisualCurrentLocatorKey] = locator
+                }
+                true
+            } else {
+                when (boundary) {
+                    "start" -> goLeft(animated)
+                    "end" -> goRight(animated)
+                    else -> false
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "::scrollByViewport - failed to parse JS response: $json", e)
+            false
+        }
     }
 
     private suspend fun afterFragmentStarted() {

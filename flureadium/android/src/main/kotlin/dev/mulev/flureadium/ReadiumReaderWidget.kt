@@ -739,6 +739,25 @@ class ReadiumReaderWidget(
                     result.success(null)
                 }
 
+                "scrollByViewport" -> {
+                    @Suppress("UNCHECKED_CAST")
+                    val args = call.arguments as Map<String, Any?>
+                    val direction = args["direction"] as? String ?: "next"
+                    val viewportFraction =
+                        (args["viewportFraction"] as? Number)?.toDouble() ?: 0.88
+                    val animated = args["animated"] as? Boolean ?: true
+                    val moved = if (isEpub) {
+                        ReadiumReader.epubScrollByViewport(
+                            direction,
+                            viewportFraction,
+                            animated
+                        )
+                    } else {
+                        false
+                    }
+                    result.success(moved)
+                }
+
                 "setLocation" -> {
                     val args = call.arguments as List<*>
                     val locatorJson = JSONObject(args[0] as String)

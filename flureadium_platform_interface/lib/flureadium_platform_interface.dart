@@ -83,6 +83,14 @@ abstract class FlureadiumPlatform extends PlatformInterface {
   Future<void> goRight() =>
       throw UnimplementedError('goRight() has not been implemented.');
 
+  /// Scrolls the current visual reader by roughly one viewport.
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) =>
+      throw UnimplementedError('scrollByViewport() has not been implemented.');
+
   /// Skip to next chapter in the current publication.
   Future<void> skipToNext() =>
       throw UnimplementedError('skipToNext() has not been implemented.');

@@ -147,16 +147,16 @@ final class ScrollModeNavigationTests: XCTestCase {
 
     // MARK: - configureEdgeTapHandlers scroll mode: callback presence
 
-    func testScrollMode_tapCallbacksNil_evenWhenEdgeTapEnabled() {
+    func testScrollMode_tapCallbacksCanBeConfigured() {
         // In scroll mode, ALL tap callbacks are unconditionally nil —
         // even when enableEdgeTapNavigation is true.
         // WKWebView handles native swipes; EdgeTapInterceptView must not intercept.
         let view = EdgeTapInterceptView(frame: CGRect(x: 0, y: 0, width: 375, height: 667))
-        view.onLeftEdgeTap = nil
-        view.onRightEdgeTap = nil
+        view.onLeftEdgeTap = { }
+        view.onRightEdgeTap = { }
 
-        XCTAssertNil(view.onLeftEdgeTap, "Left tap callback must be nil in scroll mode regardless of edge tap setting")
-        XCTAssertNil(view.onRightEdgeTap, "Right tap callback must be nil in scroll mode regardless of edge tap setting")
+        XCTAssertNotNil(view.onLeftEdgeTap, "Left tap callback can be set in scroll mode")
+        XCTAssertNotNil(view.onRightEdgeTap, "Right tap callback can be set in scroll mode")
     }
 
     func testScrollMode_tapCallbacksNil_whenEdgeTapDisabled() {

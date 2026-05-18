@@ -1191,15 +1191,23 @@ object ReadiumReader : TimebasedNavigator.TimebasedListener, EpubNavigator.Visua
     /**
      * Go left (previous page) in the EPUB navigator.
      */
-    fun epubGoLeft(animated: Boolean) {
-        epubNavigator?.goLeft(animated)
+    fun epubGoLeft(animated: Boolean): Boolean {
+        return epubNavigator?.goLeft(animated) ?: false
     }
 
     /**
      * Go right (next page) in the EPUB navigator.
      */
-    fun epubGoRight(animated: Boolean) {
-        epubNavigator?.goRight(animated)
+    fun epubGoRight(animated: Boolean): Boolean {
+        return epubNavigator?.goRight(animated) ?: false
+    }
+
+    suspend fun epubScrollByViewport(
+        direction: String,
+        viewportFraction: Double,
+        animated: Boolean
+    ): Boolean {
+        return epubNavigator?.scrollByViewport(direction, viewportFraction, animated) ?: false
     }
 
     /**

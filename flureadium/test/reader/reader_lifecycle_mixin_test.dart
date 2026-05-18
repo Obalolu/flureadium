@@ -34,6 +34,13 @@ class TestLifecycleManager
   Future<void> goRight({bool animated = true}) async {}
 
   @override
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) async => true;
+
+  @override
   Future<void> setEPUBPreferences(EPUBPreferences preferences) async {}
 
   @override

@@ -114,6 +114,16 @@ class _ReadiumReaderWidgetState extends State<ReadiumReaderWidget>
   }
 
   @override
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) async {
+    R2Log.d('scrollByViewport not implemented in web version');
+    return false;
+  }
+
+  @override
   // ignore: prefer_expression_function_bodies
   Future<Locator?> getLocatorFragments(final Locator locator) async {
     // Implement this method if needed

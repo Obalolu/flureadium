@@ -162,6 +162,19 @@ class _ReadiumReaderWidgetState extends State<ReadiumReaderWidget>
       _channel?.goRight(animated: animated);
 
   @override
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) async =>
+      await _channel?.scrollByViewport(
+        direction: direction,
+        viewportFraction: viewportFraction,
+        animated: animated,
+      ) ??
+      false;
+
+  @override
   Future<void> skipToNext({final bool animated = true}) async {
     final toc = flattenToc(widget.publication.toc);
     if (toc.isEmpty || _currentLocator == null) {

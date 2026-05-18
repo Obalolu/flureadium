@@ -156,6 +156,42 @@ void main() {
     });
   });
 
+  group('scrollByViewport', () {
+    test('forwards default arguments', () async {
+      await channel.scrollByViewport(direction: ReaderScrollDirection.next);
+
+      expect(log, hasLength(1));
+      expect(log.first.method, equals('scrollByViewport'));
+      expect(
+        log.first.arguments,
+        equals({
+          'direction': 'next',
+          'viewportFraction': 0.88,
+          'animated': true,
+        }),
+      );
+    });
+
+    test('forwards explicit arguments', () async {
+      await channel.scrollByViewport(
+        direction: ReaderScrollDirection.previous,
+        viewportFraction: 0.5,
+        animated: false,
+      );
+
+      expect(log, hasLength(1));
+      expect(log.first.method, equals('scrollByViewport'));
+      expect(
+        log.first.arguments,
+        equals({
+          'direction': 'previous',
+          'viewportFraction': 0.5,
+          'animated': false,
+        }),
+      );
+    });
+  });
+
   group('native callbacks', () {
     test('forwards external link callback from native method call', () async {
       String? seen;

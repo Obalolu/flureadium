@@ -161,6 +161,23 @@ class Flureadium {
     return _platform.goRight();
   }
 
+  /// Scrolls the current visual reader by roughly one viewport.
+  ///
+  /// In vertical-scroll EPUB readers this moves within the current spine item
+  /// and falls back to chapter navigation at boundaries. Other readers may
+  /// return false if viewport scrolling is unsupported.
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) {
+    return _platform.scrollByViewport(
+      direction: direction,
+      viewportFraction: viewportFraction,
+      animated: animated,
+    );
+  }
+
   /// Skips to the next chapter or resource.
   Future<void> skipToNext() {
     return _platform.skipToNext();

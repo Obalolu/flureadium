@@ -9,6 +9,7 @@ enum _ReaderChannelMethodInvoke {
   go,
   goLeft,
   goRight,
+  scrollByViewport,
   getCurrentLocator,
   getLocatorFragments,
   setLocation,
@@ -57,6 +58,24 @@ class ReadiumReaderChannel extends MethodChannel {
   Future<void> goRight({final bool animated = true}) {
     R2Log.d('$name: $animated');
     return _invokeMethod(_ReaderChannelMethodInvoke.goRight, animated);
+  }
+
+  /// Scroll by roughly one viewport in the current visual reader.
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) {
+    final args = <String, dynamic>{
+      'direction': direction.name,
+      'viewportFraction': viewportFraction,
+      'animated': animated,
+    };
+    R2Log.d('$name: $args');
+    return _invokeMethod<bool>(
+      _ReaderChannelMethodInvoke.scrollByViewport,
+      args,
+    ).then((value) => value ?? false);
   }
 
   /// Get locator fragments for the given [locator].

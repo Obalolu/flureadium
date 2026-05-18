@@ -159,36 +159,40 @@ class EpubReaderFragment : VisualReaderFragment(), EpubNavigatorFragment.Listene
     /**
      * Navigate left (previous page).
      */
-    fun goLeft(animated: Boolean) {
+    fun goLeft(animated: Boolean): Boolean {
         Log.d(TAG, "::goLeft")
         val navigator = epubNavigator
         if (navigator == null) {
             Log.d(TAG, "::goLeft. Navigator not ready.")
-            return
+            return false
         }
 
-        if (navigator.goBackward(animated)) {
+        return if (navigator.goBackward(animated)) {
             Log.d(TAG, "::goLeft: Went back.")
+            true
         } else {
             Log.d(TAG, "::goLeft: Couldn't go back.")
+            false
         }
     }
 
     /**
      * Navigate right (next page).
      */
-    fun goRight(animated: Boolean) {
+    fun goRight(animated: Boolean): Boolean {
         Log.d(TAG, "::goRight")
         val navigator = epubNavigator
         if (navigator == null) {
             Log.d(TAG, "::goRight. Navigator not ready.")
-            return
+            return false
         }
 
-        if (navigator.goForward(animated)) {
+        return if (navigator.goForward(animated)) {
             Log.d(TAG, "::goRight: Went forward.")
+            true
         } else {
             Log.d(TAG, "::goRight: Couldn't go forward.")
+            false
         }
     }
 
@@ -352,12 +356,13 @@ class EpubReaderFragment : VisualReaderFragment(), EpubNavigatorFragment.Listene
                 ViewGroup.LayoutParams.MATCH_PARENT,
             )
             overlay.wireCallbacks(
-                onLeft = { goLeft(animated = true) },
-                onRight = { goRight(animated = true) },
+                onLeft = { launch { ReadiumReader.epubScrollByViewport("previous", 0.88, true) } },
+                onRight = { launch { ReadiumReader.epubScrollByViewport("next", 0.88, true) } },
                 onSwipeLeft = { goRight(animated = true) },
                 onSwipeRight = { goLeft(animated = true) },
             )
             storedNavigationConfig?.let { overlay.applyConfig(it) }
+            overlay.setScrollMode(preferences.scroll ?: false)
             rootView.addView(overlay)
             edgeTapInterceptView = overlay
         }

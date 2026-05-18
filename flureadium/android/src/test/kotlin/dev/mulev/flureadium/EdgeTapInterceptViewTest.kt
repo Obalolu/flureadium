@@ -85,12 +85,12 @@ internal class EdgeTapInterceptViewTest {
     // ── Scroll mode ───────────────────────────────────────────────────────────
 
     @Test
-    fun setScrollMode_disablesAllGestures_whenTrue() {
+    fun setScrollMode_keepsEdgeTapsAndDisablesSwipes_whenTrue() {
         val config = FlutterNavigationConfig(
             enableEdgeTapNavigation = true,
             enableSwipeNavigation = true,
         )
-        assertFalse(EdgeTapInterceptView.effectiveEdgeTapEnabled(config, isScrollMode = true))
+        assertTrue(EdgeTapInterceptView.effectiveEdgeTapEnabled(config, isScrollMode = true))
         assertFalse(EdgeTapInterceptView.effectiveSwipeEnabled(config, isScrollMode = true))
     }
 

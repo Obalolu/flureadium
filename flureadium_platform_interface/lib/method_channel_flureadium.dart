@@ -137,6 +137,19 @@ class MethodChannelFlureadium extends FlureadiumPlatform {
   Future<void> goRight() async => await currentReaderWidget?.goRight();
 
   @override
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) async =>
+      await currentReaderWidget?.scrollByViewport(
+        direction: direction,
+        viewportFraction: viewportFraction,
+        animated: animated,
+      ) ??
+      false;
+
+  @override
   Future<void> skipToNext() async => await currentReaderWidget?.skipToNext();
 
   @override

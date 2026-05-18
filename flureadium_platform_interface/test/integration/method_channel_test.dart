@@ -498,6 +498,18 @@ void main() {
         expect(mockWidget.goRightCalled, isTrue);
       });
 
+      test('scrollByViewport delegates to currentReaderWidget', () async {
+        final mockWidget = MockReaderWidget();
+        platform.currentReaderWidget = mockWidget;
+
+        final result = await platform.scrollByViewport(
+          direction: ReaderScrollDirection.next,
+        );
+
+        expect(result, isTrue);
+        expect(mockWidget.scrollByViewportCalled, isTrue);
+      });
+
       test('skipToNext delegates to currentReaderWidget', () async {
         final mockWidget = MockReaderWidget();
         platform.currentReaderWidget = mockWidget;
@@ -611,6 +623,7 @@ class _FakeFlureadiumPlatform extends FlureadiumPlatform {
 class MockReaderWidget implements ReadiumReaderWidgetInterface {
   bool goLeftCalled = false;
   bool goRightCalled = false;
+  bool scrollByViewportCalled = false;
   bool skipToNextCalled = false;
   bool skipToPreviousCalled = false;
   bool setEPUBPreferencesCalled = false;
@@ -631,6 +644,16 @@ class MockReaderWidget implements ReadiumReaderWidgetInterface {
   @override
   Future<void> goRight({bool animated = true}) async {
     goRightCalled = true;
+  }
+
+  @override
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) async {
+    scrollByViewportCalled = true;
+    return true;
   }
 
   @override

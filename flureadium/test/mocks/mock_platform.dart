@@ -137,6 +137,22 @@ class MockFlureadiumPlatform
   }
 
   @override
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) async {
+    calls.add(
+      MockMethodCall('scrollByViewport', {
+        'direction': direction,
+        'viewportFraction': viewportFraction,
+        'animated': animated,
+      }),
+    );
+    return true;
+  }
+
+  @override
   Future<void> skipToNext() async {
     calls.add(MockMethodCall('skipToNext'));
   }

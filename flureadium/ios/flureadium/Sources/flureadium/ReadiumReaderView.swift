@@ -309,6 +309,40 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
     configureEdgeTapHandlers(isScrollMode: isVerticalScroll)
   }
 
+  private func scrollByViewport(direction: String, viewportFraction: Double, animated: Bool) async -> Bool {
+    if !isVerticalScroll {
+      if direction == "previous" {
+        return await readiumViewController.goLeft(options: NavigatorGoOptions(animated: animated))
+      }
+      return await readiumViewController.goRight(options: NavigatorGoOptions(animated: animated))
+    }
+
+    switch await evaluateJavascript("window.epubPage.scrollByViewport(\"\(direction)\", \(viewportFraction));") {
+    case .success(let data):
+      guard let dict = data as? [String: Any] else {
+        print(TAG, "scrollByViewport: invalid JS result \(data)")
+        return false
+      }
+
+      if dict["moved"] as? Bool == true {
+        emitOnPageChanged()
+        return true
+      }
+
+      switch dict["boundary"] as? String {
+      case "start":
+        return await readiumViewController.goLeft(options: NavigatorGoOptions(animated: animated))
+      case "end":
+        return await readiumViewController.goRight(options: NavigatorGoOptions(animated: animated))
+      default:
+        return false
+      }
+    case .failure(let err):
+      print(TAG, "scrollByViewport failed! \(err)")
+      return false
+    }
+  }
+
   /// Configure edge tap handlers based on scroll mode.
   /// In scroll mode, all callbacks are nil — WKWebView handles native swipes.
   /// In paginated mode, edge taps trigger goLeft/goRight for page navigation.
@@ -323,8 +357,26 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
     if isScrollMode {
       // Scroll mode: all callbacks nil.
       // Swipes are handled natively by WKWebView — no interception needed.
-      edgeTapView.onLeftEdgeTap = nil
-      edgeTapView.onRightEdgeTap = nil
+      if enableEdgeTapNavigation {
+        if let points = edgeTapAreaPoints {
+          edgeTapView.edgeThresholdPoints = points
+        }
+        edgeTapView.onLeftEdgeTap = { [weak self] in
+          guard let self = self else { return }
+          Task { @MainActor in
+            let _ = await self.scrollByViewport(direction: "previous", viewportFraction: 0.88, animated: true)
+          }
+        }
+        edgeTapView.onRightEdgeTap = { [weak self] in
+          guard let self = self else { return }
+          Task { @MainActor in
+            let _ = await self.scrollByViewport(direction: "next", viewportFraction: 0.88, animated: true)
+          }
+        }
+      } else {
+        edgeTapView.onLeftEdgeTap = nil
+        edgeTapView.onRightEdgeTap = nil
+      }
       edgeTapView.onSwipeLeft = nil
       edgeTapView.onSwipeRight = nil
     } else {
@@ -510,6 +562,20 @@ class ReadiumReaderView: NSObject, FlutterPlatformView, EPUBNavigatorDelegate, V
 
       Task { @MainActor in
         let success = await readiumViewController.goRight(options: NavigatorGoOptions(animated: animated))
+        result(success)
+      }
+      break
+    case "scrollByViewport":
+      let args = call.arguments as! [String: Any]
+      let direction = args["direction"] as? String ?? "next"
+      let viewportFraction = args["viewportFraction"] as? Double ?? 0.88
+      let animated = args["animated"] as? Bool ?? true
+
+      Task { @MainActor in
+        let success = await self.scrollByViewport(
+          direction: direction,
+          viewportFraction: viewportFraction,
+          animated: animated)
         result(success)
       }
       break

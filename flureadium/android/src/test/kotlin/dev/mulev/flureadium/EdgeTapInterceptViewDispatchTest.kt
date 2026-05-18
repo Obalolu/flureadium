@@ -124,12 +124,12 @@ internal class EdgeTapInterceptViewDispatchTest {
     // ── Scroll mode ───────────────────────────────────────────────────────────
 
     @Test
-    fun dispatchTouchEvent_scrollMode_edgePassesThroughGesture() {
+    fun dispatchTouchEvent_scrollMode_edgeTapStillClaimsGesture() {
         view.wireCallbacks(onLeft = {}, onRight = {}, onSwipeLeft = {}, onSwipeRight = {})
         view.setScrollMode(true)
 
         val ev = down(x = 390f)
-        assertFalse(view.dispatchTouchEvent(ev), "Edge tap in scroll mode should pass through (return false)")
+        assertTrue(view.dispatchTouchEvent(ev), "Edge tap in scroll mode should be claimed")
         ev.recycle()
     }
 

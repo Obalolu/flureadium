@@ -23,3 +23,6 @@ enum TTSVoiceGender { male, female, unspecified }
 enum TTSVoiceQuality { lowest, low, normal, high, highest }
 
 enum TtsErrorType { languageMissingData, unknown }
+
+/// Direction for viewport-sized scroll navigation in visual readers.
+enum ReaderScrollDirection { previous, next }

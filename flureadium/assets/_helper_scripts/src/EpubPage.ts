@@ -4,7 +4,7 @@ import { ComicBookPage } from 'ComicBookPage';
 import { getCssSelector } from 'css-selector-generator';
 import { initResponsiveTables } from './Tables';
 
-import { DomRange, ICurrentHeading, IHeadingElement, Locations, Locator, Readium, Rect } from 'types';
+import { DomRange, ICurrentHeading, IHeadingElement, Locations, Locator, Readium, Rect, ScrollByViewportResult } from 'types';
 import './EpubPage.scss';
 
 declare const isIos: boolean;
@@ -108,6 +108,42 @@ export class EpubPage {
     }
 
     return false;
+  }
+
+  public scrollByViewport(direction: 'previous' | 'next', viewportFraction = 0.88): ScrollByViewportResult {
+    try {
+      const scroller = document.scrollingElement;
+      if (scroller == null) {
+        return { moved: false, boundary: null };
+      }
+
+      const normalizedDirection = direction === 'previous' ? -1 : 1;
+      const safeFraction = this._clamp(Number.isFinite(viewportFraction) ? viewportFraction : 0.88, 0.1, 1);
+      const maxScroll = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+
+      if (maxScroll <= 0) {
+        return { moved: false, boundary: normalizedDirection < 0 ? 'start' : 'end' };
+      }
+
+      const currentTop = this._clamp(scroller.scrollTop, 0, maxScroll);
+      const step = scroller.clientHeight * safeFraction;
+      const nextTop = this._clamp(currentTop + normalizedDirection * step, 0, maxScroll);
+
+      if (Math.abs(nextTop - currentTop) < 1) {
+        return {
+          moved: false,
+          boundary: normalizedDirection < 0 ? 'start' : 'end',
+        };
+      }
+
+      readium?.scrollToPosition(nextTop / scroller.scrollHeight);
+
+      return { moved: true, boundary: null };
+    } catch (error) {
+      this._errorLog(error);
+
+      return { moved: false, boundary: null };
+    }
   }
 
   // Checks whether a given locator is (at least partially) visible.

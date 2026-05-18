@@ -2,6 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flureadium_platform_interface/flureadium_platform_interface.dart';
 
 void main() {
+  group('ReaderScrollDirection', () {
+    test('serializable names match platform channel contract', () {
+      expect(ReaderScrollDirection.previous.name, equals('previous'));
+      expect(ReaderScrollDirection.next.name, equals('next'));
+    });
+  });
+
   group('ReaderNavigationConfig', () {
     test('creates instance with all fields null', () {
       final config = ReaderNavigationConfig();

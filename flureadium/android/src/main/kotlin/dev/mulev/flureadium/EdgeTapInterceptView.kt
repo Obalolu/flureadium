@@ -186,18 +186,10 @@ class EdgeTapInterceptView @JvmOverloads constructor(
         val config = storedConfig
         edgeTapThresholdDp = effectiveThresholdDp(config)
 
-        if (isInScrollMode) {
-            onLeftEdgeTap = null
-            onRightEdgeTap = null
-            onSwipeLeft = null
-            onSwipeRight = null
-            return
-        }
-
-        onLeftEdgeTap = if (effectiveEdgeTapEnabled(config, false)) baseOnLeftEdgeTap else null
-        onRightEdgeTap = if (effectiveEdgeTapEnabled(config, false)) baseOnRightEdgeTap else null
-        onSwipeLeft = if (effectiveSwipeEnabled(config, false)) baseOnSwipeLeft else null
-        onSwipeRight = if (effectiveSwipeEnabled(config, false)) baseOnSwipeRight else null
+        onLeftEdgeTap = if (effectiveEdgeTapEnabled(config, isInScrollMode)) baseOnLeftEdgeTap else null
+        onRightEdgeTap = if (effectiveEdgeTapEnabled(config, isInScrollMode)) baseOnRightEdgeTap else null
+        onSwipeLeft = if (effectiveSwipeEnabled(config, isInScrollMode)) baseOnSwipeLeft else null
+        onSwipeRight = if (effectiveSwipeEnabled(config, isInScrollMode)) baseOnSwipeRight else null
     }
 
     companion object {
@@ -211,7 +203,7 @@ class EdgeTapInterceptView @JvmOverloads constructor(
         internal fun effectiveEdgeTapEnabled(
             config: FlutterNavigationConfig?,
             isScrollMode: Boolean,
-        ): Boolean = !isScrollMode && config?.enableEdgeTapNavigation != false
+        ): Boolean = config?.enableEdgeTapNavigation != false
 
         internal fun effectiveSwipeEnabled(
             config: FlutterNavigationConfig?,

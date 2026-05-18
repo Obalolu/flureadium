@@ -14,6 +14,16 @@ abstract class ReadiumReaderWidgetInterface {
   /// Go to next page.
   Future<void> goRight({final bool animated = true});
 
+  /// Scroll by roughly one viewport in scroll-mode readers.
+  ///
+  /// Returns true when the current visual position changed or when boundary
+  /// navigation was attempted by the platform reader.
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  });
+
   /// Skip to previous chapter (toc)
   Future<void> skipToPrevious({final bool animated = true});
 

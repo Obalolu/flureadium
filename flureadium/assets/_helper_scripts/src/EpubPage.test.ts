@@ -18,11 +18,33 @@ const mockReadium: Partial<Readium> = {
 
 describe('EpubPage', () => {
   let epubPage: EpubPage;
+  let originalInnerHeight: number;
 
   beforeEach(() => {
     jest.clearAllMocks();
     epubPage = new EpubPage();
+    originalInnerHeight = window.innerHeight;
   });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      value: originalInnerHeight,
+    });
+  });
+
+  function setScroller({ scrollTop, scrollHeight, clientHeight }: { scrollTop: number; scrollHeight: number; clientHeight: number }) {
+    const scroller = {
+      scrollTop,
+      scrollHeight,
+      clientHeight,
+    };
+    Object.defineProperty(document, 'scrollingElement', {
+      configurable: true,
+      value: scroller,
+    });
+    return scroller;
+  }
 
   describe('scrollToLocations', () => {
     describe('scroll mode (isVerticalScroll = true)', () => {
@@ -169,6 +191,88 @@ describe('EpubPage', () => {
         // 0 is a valid progression, should be used
         expect(mockScrollToPosition).toHaveBeenCalledWith(0);
       });
+    });
+  });
+
+  describe('scrollByViewport', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: 1000,
+      });
+    });
+
+    it('scrolls down by viewport fraction', () => {
+      setScroller({ scrollTop: 100, scrollHeight: 3000, clientHeight: 1000 });
+
+      const result = epubPage.scrollByViewport('next', 0.88);
+
+      expect(result).toEqual({ moved: true, boundary: null });
+      expect(mockScrollToPosition).toHaveBeenCalledWith(980 / 3000);
+    });
+
+    it('scrolls up by viewport fraction', () => {
+      setScroller({ scrollTop: 1000, scrollHeight: 3000, clientHeight: 1000 });
+
+      const result = epubPage.scrollByViewport('previous', 0.5);
+
+      expect(result).toEqual({ moved: true, boundary: null });
+      expect(mockScrollToPosition).toHaveBeenCalledWith(500 / 3000);
+    });
+
+    it('clamps to the end of the document', () => {
+      setScroller({ scrollTop: 1800, scrollHeight: 3000, clientHeight: 1000 });
+
+      const result = epubPage.scrollByViewport('next', 0.88);
+
+      expect(result).toEqual({ moved: true, boundary: null });
+      expect(mockScrollToPosition).toHaveBeenCalledWith(2000 / 3000);
+    });
+
+    it('returns end boundary when already at the end', () => {
+      setScroller({ scrollTop: 2000, scrollHeight: 3000, clientHeight: 1000 });
+
+      const result = epubPage.scrollByViewport('next', 0.88);
+
+      expect(result).toEqual({ moved: false, boundary: 'end' });
+      expect(mockScrollToPosition).not.toHaveBeenCalled();
+    });
+
+    it('returns start boundary when already at the start', () => {
+      setScroller({ scrollTop: 0, scrollHeight: 3000, clientHeight: 1000 });
+
+      const result = epubPage.scrollByViewport('previous', 0.88);
+
+      expect(result).toEqual({ moved: false, boundary: 'start' });
+      expect(mockScrollToPosition).not.toHaveBeenCalled();
+    });
+
+    it('returns boundary for a non-scrollable document', () => {
+      setScroller({ scrollTop: 0, scrollHeight: 900, clientHeight: 1000 });
+
+      expect(epubPage.scrollByViewport('previous', 0.88)).toEqual({ moved: false, boundary: 'start' });
+      expect(epubPage.scrollByViewport('next', 0.88)).toEqual({ moved: false, boundary: 'end' });
+      expect(mockScrollToPosition).not.toHaveBeenCalled();
+    });
+
+    it('uses default fraction for invalid values', () => {
+      setScroller({ scrollTop: 100, scrollHeight: 3000, clientHeight: 1000 });
+
+      epubPage.scrollByViewport('next', Number.NaN);
+
+      expect(mockScrollToPosition).toHaveBeenCalledWith(980 / 3000);
+    });
+
+    it('uses scroller clientHeight instead of window innerHeight for the step', () => {
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: 1200,
+      });
+      setScroller({ scrollTop: 100, scrollHeight: 3000, clientHeight: 800 });
+
+      epubPage.scrollByViewport('next', 0.5);
+
+      expect(mockScrollToPosition).toHaveBeenCalledWith(500 / 3000);
     });
   });
 });

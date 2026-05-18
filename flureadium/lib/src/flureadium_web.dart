@@ -136,6 +136,16 @@ class FlureadiumWebPlugin extends FlureadiumPlatform {
   }
 
   @override
+  Future<bool> scrollByViewport({
+    required ReaderScrollDirection direction,
+    double viewportFraction = 0.88,
+    bool animated = true,
+  }) async {
+    R2Log.d('scrollByViewport is not implemented on web platform');
+    return false;
+  }
+
+  @override
   Future<void> skipToNext() async {
     R2Log.d('skipToNext is not implemented on web platform');
   }
